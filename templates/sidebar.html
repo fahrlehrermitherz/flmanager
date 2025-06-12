@@ -1,0 +1,37 @@
+<!-- sidebar.html -->
+<aside class="bg-white shadow-md w-64 hidden md:block">
+    <div class="p-4 border-b">
+        <h1 class="text-xl font-bold text-blue-600">flmanager</h1>
+        <p class="text-sm text-gray-500">Version 1.0</p>
+    </div>
+    <nav class="flex flex-col gap-1 p-4">
+        <a href="{{ url_for('main.dashboard') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition {% if request.endpoint == 'main.dashboard' %}bg-blue-100{% endif %}">
+            🏠 Dashboard
+        </a>
+        <a href="{{ url_for('schueler.schueler_liste') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition">
+            👨‍🎓 Schülerverwaltung
+        </a>
+        <a href="{{ url_for('slots.slots_verwalten') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition">
+            📅 Fahrstunden-Kalender
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-red-100 transition text-red-700 mt-4">
+            🚪 Logout
+        </a>
+    </nav>
+</aside>
+
+<!-- Mobile Version -->
+<div class="md:hidden bg-white border-b flex items-center justify-between px-4 py-3">
+    <div>
+        <h1 class="text-xl font-bold text-blue-600">flmanager</h1>
+    </div>
+    <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="text-gray-700">
+        ☰
+    </button>
+</div>
+<div id="mobileMenu" class="md:hidden hidden bg-white px-4 py-2">
+    <a href="{{ url_for('main.dashboard') }}" class="block py-2 border-b">🏠 Dashboard</a>
+    <a href="{{ url_for('schueler.schueler_liste') }}" class="block py-2 border-b">👨‍🎓 Schülerverwaltung</a>
+    <a href="{{ url_for('slots.slots_verwalten') }}" class="block py-2 border-b">📅 Kalender</a>
+    <a href="{{ url_for('auth.logout') }}" class="block py-2 text-red-600">🚪 Logout</a>
+</div>
