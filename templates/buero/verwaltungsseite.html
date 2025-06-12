@@ -1,0 +1,43 @@
+<!-- templates/buero/verwaltungsseite.html -->
+{% extends 'base.html' %}
+
+{% block title %}Fahrstundenübersicht{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">📅 Fahrstundenübersicht aller Fahrlehrer</h1>
+
+<form method="get" class="mb-4 flex flex-wrap items-center gap-2">
+    <label for="monat">Monat:</label>
+    <input type="month" id="monat" name="monat" value="{{ request.args.get('monat', '') }}" class="border rounded px-2 py-1">
+    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Filtern</button>
+</form>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white border rounded shadow">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-4 py-2 text-left">Fahrlehrer</th>
+                <th class="px-4 py-2">Schüler</th>
+                <th class="px-4 py-2">Datum</th>
+                <th class="px-4 py-2">Typ</th>
+                <th class="px-4 py-2">Dauer</th>
+                <th class="px-4 py-2">Bezahlung</th>
+                <th class="px-4 py-2">Gesamtpreis</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eintrag in fahrten %}
+            <tr class="border-b">
+                <td class="px-4 py-2">{{ eintrag.fahrlehrer.vorname }} {{ eintrag.fahrlehrer.nachname }}</td>
+                <td class="px-4 py-2">{{ eintrag.schueler.vorname }} {{ eintrag.schueler.nachname }}</td>
+                <td class="px-4 py-2">{{ eintrag.datum.strftime('%d.%m.%Y') }}</td>
+                <td class="px-4 py-2">{{ eintrag.typ.name }}</td>
+                <td class="px-4 py-2">{{ eintrag.dauer_minuten }} Min</td>
+                <td class="px-4 py-2">{{ eintrag.bezahlt }}</td>
+                <td class="px-4 py-2">{{ (eintrag.dauer_minuten * eintrag.typ.preis_pro_minute)|round(2) }} €</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
