@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">🚦 Dashboard</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="bg-white p-6 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2">📊 Gesamtübersicht</h2>
+    <p>Aktive Fahrschüler: <strong>{{ anzahl_schueler }}</strong></p>
+    <p>Heutiges Datum: <strong>{{ heute }}</strong></p>
+  </div>
+
+  <div class="bg-white p-6 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2">📅 Nächste Schritte</h2>
+    <ul class="list-disc list-inside text-gray-700">
+      <li>Neue Fahrschüler anlegen</li>
+      <li>Fahrstunden verwalten</li>
+      <li>Daten aktualisieren</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
