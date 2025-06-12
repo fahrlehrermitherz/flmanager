@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from models import User
@@ -17,17 +17,21 @@ def login():
         password = request.form.get('password')
 
         user = User.query.filter_by(email=email).first()
-        if user and check_password_hash(user.password, password):
+        if user and check_password_hash(user.passwort, password):
             login_user(user)
-            flash('Login erfolgreich.', 'success')
-            return redirect(url_for('main.dashboard'))
+            session["user_id"] = user.id
+            session["rolle"] = user.rolle.name
+            session["name"] = f"{user.vorname} {user.nachname}"
+            flash('✅ Login erfolgreich.', 'success')
+            return redirect(url_for('main.dashboard'))  # oder: role-based redirect
         else:
-            flash('Ungültige Zugangsdaten.', 'danger')
+            flash('❌ Ungültige Zugangsdaten.', 'danger')
     return render_template('auth/login.html')
 
 @auth.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('Du wurdest ausgeloggt.', 'info')
+    session.clear()
+    flash('🚪 Du wurdest ausgeloggt.', 'info')
     return redirect(url_for('auth.login'))
