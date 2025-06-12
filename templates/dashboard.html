@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <h1 class="text-3xl font-bold mb-4 text-blue-700">Willkommen im Fahrstunden-Manager</h1>
+    <p class="text-gray-700">Dies ist dein zentrales Dashboard für Schüler, Fahrstunden und Auswertung.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <div class="bg-white rounded shadow p-4">
+            <h2 class="text-lg font-semibold text-gray-800">👨‍🏫 Fahrlehrer</h2>
+            <p class="text-gray-500">Fahrstunden einsehen & bestätigen</p>
+        </div>
+        <div class="bg-white rounded shadow p-4">
+            <h2 class="text-lg font-semibold text-gray-800">📅 Kalender</h2>
+            <p class="text-gray-500">Verfügbare Slots verwalten</p>
+        </div>
+        <div class="bg-white rounded shadow p-4">
+            <h2 class="text-lg font-semibold text-gray-800">📊 Auswertung</h2>
+            <p class="text-gray-500">Fahrten & Zahlungen im Blick</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
