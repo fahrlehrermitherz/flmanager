@@ -20,8 +20,12 @@ def create_app():
     # Blueprints importieren und registrieren
     from auth.routes import auth
     from main.routes import main
+    from schueler.routes import schueler
+    from buero.routes import buero  # <== NEU
 
     app.register_blueprint(auth)
     app.register_blueprint(main)
+    app.register_blueprint(schueler)
+    app.register_blueprint(buero)  # <== NEU
 
     return app
