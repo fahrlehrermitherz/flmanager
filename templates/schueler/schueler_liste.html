@@ -3,33 +3,32 @@
 {% block title %}Alle Fahrschüler{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <h2 class="text-2xl font-bold">📋 Alle Fahrschüler</h2>
-    <p class="text-gray-500">Liste aller registrierten Schüler</p>
-</div>
+<h1 class="text-2xl font-bold mb-6">📋 Alle Fahrschüler</h1>
 
-<table class="min-w-full bg-white border border-gray-200 rounded shadow">
-    <thead class="bg-gray-100 text-left">
-        <tr>
-            <th class="px-4 py-2">👤 Name</th>
-            <th class="px-4 py-2">📅 Geburtsdatum</th>
-            <th class="px-4 py-2">📱 Telefonnummer</th>
-            <th class="px-4 py-2">📍 Ort</th>
-        </tr>
+<div class="overflow-x-auto">
+  <table class="w-full table-auto bg-white rounded shadow text-sm">
+    <thead class="bg-blue-100 text-blue-900">
+      <tr>
+        <th class="p-3 text-left">👤 Name</th>
+        <th class="p-3 text-left">📅 Alter</th>
+        <th class="p-3 text-left">🚘 Klasse</th>
+        <th class="p-3 text-left">⚙️ Aktionen</th>
+      </tr>
     </thead>
     <tbody>
-        {% for s in schueler %}
-        <tr class="border-t">
-            <td class="px-4 py-2">{{ s.vorname }} {{ s.nachname }}</td>
-            <td class="px-4 py-2">{{ s.geburtsdatum.strftime('%d.%m.%Y') }}</td>
-            <td class="px-4 py-2">{{ s.telefonnummer }}</td>
-            <td class="px-4 py-2">{{ s.ort }}</td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="4" class="text-center text-gray-500 py-4">Keine Schüler vorhanden.</td>
-        </tr>
-        {% endfor %}
+      {% for s in schueler %}
+      <tr class="border-t hover:bg-gray-50">
+        <td class="p-3">{{ s.vorname }} {{ s.nachname }}</td>
+        <td class="p-3">{{ s.alter }}</td>
+        <td class="p-3">{{ s.klasse }}</td>
+        <td class="p-3">
+          <a href="#" class="text-blue-600 hover:underline">🔍 Profil</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td class="p-3 text-gray-500 italic" colspan="4">Keine Schüler gefunden.</td></tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+</div>
 {% endblock %}
