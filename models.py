@@ -48,3 +48,20 @@ class Fahrstundenprotokoll(db.Model):
 
     schueler = db.relationship('Schueler', backref='fahrten')
     fahrlehrer = db.relationship('User', backref='durchgefuehrte_fahrten')
+
+# models.py (Erweiterung)
+
+class FahrstundenTyp(db.Model):
+    __tablename__ = 'fahrstundentypen'
+    id = db.Column(db.Integer, primary_key=True)
+    bezeichnung = db.Column(db.String(100), nullable=False)
+    minuten = db.Column(db.Integer, nullable=False)
+    minutenpreis = db.Column(db.Numeric(5, 2), nullable=False)
+
+    def __repr__(self):
+        return f"{self.bezeichnung} ({self.minuten} Min) - {self.minutenpreis} €/Min"
+
+# Beispielhafte Beziehung in Fahrstundenprotokoll (ergänzen):
+# typ_id = db.Column(db.Integer, db.ForeignKey('fahrstundentypen.id'))
+# typ = db.relationship('FahrstundenTyp', backref='protokolle')
+
