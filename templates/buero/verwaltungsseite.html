@@ -6,15 +6,16 @@
 {% block content %}
 <h1 class="text-2xl font-bold mb-6">📅 Fahrstundenübersicht aller Fahrlehrer</h1>
 
-<form method="get" class="mb-4 flex flex-wrap items-center gap-2">
-    <label for="monat">Monat:</label>
-    <input type="month" id="monat" name="monat" value="{{ request.args.get('monat', '') }}" class="border rounded px-2 py-1">
-    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Filtern</button>
+<form method="get" class="mb-6 flex flex-wrap items-center gap-2">
+    <label for="monat" class="text-sm">Monat wählen:</label>
+    <input type="month" id="monat" name="monat" value="{{ request.args.get('monat', '') }}" class="border border-gray-300 rounded px-3 py-1">
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded transition">Filtern</button>
 </form>
 
+{% if fahrten %}
 <div class="overflow-x-auto">
-    <table class="min-w-full bg-white border rounded shadow">
-        <thead class="bg-gray-100">
+    <table class="min-w-full bg-white border rounded-lg shadow text-sm">
+        <thead class="bg-gray-100 text-gray-700">
             <tr>
                 <th class="px-4 py-2 text-left">Fahrlehrer</th>
                 <th class="px-4 py-2">Schüler</th>
@@ -25,19 +26,24 @@
                 <th class="px-4 py-2">Gesamtpreis</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
             {% for eintrag in fahrten %}
-            <tr class="border-b">
-                <td class="px-4 py-2">{{ eintrag.fahrlehrer.vorname }} {{ eintrag.fahrlehrer.nachname }}</td>
-                <td class="px-4 py-2">{{ eintrag.schueler.vorname }} {{ eintrag.schueler.nachname }}</td>
-                <td class="px-4 py-2">{{ eintrag.datum.strftime('%d.%m.%Y') }}</td>
-                <td class="px-4 py-2">{{ eintrag.typ.name }}</td>
-                <td class="px-4 py-2">{{ eintrag.dauer_minuten }} Min</td>
-                <td class="px-4 py-2">{{ eintrag.bezahlt }}</td>
-                <td class="px-4 py-2">{{ (eintrag.dauer_minuten * eintrag.typ.preis_pro_minute)|round(2) }} €</td>
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2 whitespace-nowrap">{{ eintrag.fahrlehrer.vorname }} {{ eintrag.fahrlehrer.nachname }}</td>
+                <td class="px-4 py-2 whitespace-nowrap">{{ eintrag.schueler.vorname }} {{ eintrag.schueler.nachname }}</td>
+                <td class="px-4 py-2 whitespace-nowrap">{{ eintrag.datum.strftime('%d.%m.%Y') }}</td>
+                <td class="px-4 py-2 whitespace-nowrap">{{ eintrag.typ.name }}</td>
+                <td class="px-4 py-2 whitespace-nowrap">{{ eintrag.dauer_minuten }} Min</td>
+                <td class="px-4 py-2 whitespace-nowrap">{{ eintrag.bezahlt }}</td>
+                <td class="px-4 py-2 whitespace-nowrap">{{ (eintrag.dauer_minuten * eintrag.typ.preis_pro_minute)|round(2) }} €</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+{% else %}
+<div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-md shadow-sm">
+    🔍 Keine Fahrstunden im ausgewählten Zeitraum gefunden.
+</div>
+{% endif %}
 {% endblock %}
