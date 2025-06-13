@@ -1,41 +1,50 @@
 {% extends 'base.html' %}
 
-{% block title %}Kassenbuch{% endblock %}
+{% block title %}📘 Kassenbuch{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">📘 Kassenbuch</h1>
+<h1 class="text-2xl font-bold mb-6">📘 Kassenbuch – Einnahmenübersicht</h1>
 
-<form method="get" class="mb-4 flex flex-wrap items-center gap-2">
-    <label for="monat">Monat:</label>
+<form method="get" class="mb-4 flex flex-wrap items-center gap-3">
+    <label for="monat" class="font-medium">Monat:</label>
     <input type="month" id="monat" name="monat" value="{{ request.args.get('monat', '') }}" class="border rounded px-2 py-1">
-    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Filtern</button>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Filtern</button>
 </form>
 
 <div class="overflow-x-auto">
-    <table class="min-w-full bg-white border rounded shadow">
-        <thead class="bg-gray-100 text-sm text-left">
+    <table class="min-w-full bg-white border rounded shadow-md text-sm">
+        <thead class="bg-gray-100 text-left">
             <tr>
-                <th class="px-4 py-2">Datum</th>
-                <th class="px-4 py-2">Fahrlehrer</th>
-                <th class="px-4 py-2">Schüler</th>
-                <th class="px-4 py-2">Typ</th>
-                <th class="px-4 py-2">Dauer</th>
-                <th class="px-4 py-2">Zahlungsart</th>
-                <th class="px-4 py-2">Betrag (€)</th>
+                <th class="px-4 py-2">📅 Datum</th>
+                <th class="px-4 py-2">⏰ Uhrzeit</th>
+                <th class="px-4 py-2">👨‍🏫 Fahrlehrer</th>
+                <th class="px-4 py-2">🧑‍🎓 Schüler</th>
+                <th class="px-4 py-2">📋 Inhalt</th>
+                <th class="px-4 py-2">⏱️ Dauer</th>
+                <th class="px-4 py-2">💳 Bezahlung</th>
+                <th class="px-4 py-2">💶 Betrag (€)</th>
             </tr>
         </thead>
         <tbody>
-            {% for eintrag in kassenbuch %}
-            <tr class="border-b text-sm">
+            {% set gesamt = 0 %}
+            {% for eintrag in fahrten %}
+            {% set betrag = eintrag.dauer_minuten * eintrag.typ.preis_pro_minute %}
+            {% set gesamt = gesamt + betrag %}
+            <tr class="border-b hover:bg-gray-50">
                 <td class="px-4 py-2">{{ eintrag.datum.strftime('%d.%m.%Y') }}</td>
+                <td class="px-4 py-2">{{ eintrag.uhrzeit.strftime('%H:%M') }}</td>
                 <td class="px-4 py-2">{{ eintrag.fahrlehrer.vorname }} {{ eintrag.fahrlehrer.nachname }}</td>
                 <td class="px-4 py-2">{{ eintrag.schueler.vorname }} {{ eintrag.schueler.nachname }}</td>
-                <td class="px-4 py-2">{{ eintrag.typ }}</td>
+                <td class="px-4 py-2">{{ eintrag.inhalt }}</td>
                 <td class="px-4 py-2">{{ eintrag.dauer_minuten }} Min</td>
-                <td class="px-4 py-2">{{ eintrag.zahlungsart }}</td>
-                <td class="px-4 py-2">{{ eintrag.betrag | round(2) }} €</td>
+                <td class="px-4 py-2">{{ eintrag.bezahlt }}</td>
+                <td class="px-4 py-2">{{ betrag|round(2) }}</td>
             </tr>
             {% endfor %}
+            <tr class="font-bold bg-gray-100 border-t">
+                <td colspan="7" class="px-4 py-2 text-right">💰 Gesamteinnahmen:</td>
+                <td class="px-4 py-2">{{ gesamt|round(2) }} €</td>
+            </tr>
         </tbody>
     </table>
 </div>
