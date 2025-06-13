@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Büro-Dashboard{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">📊 Büro-Dashboard</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white p-4 rounded shadow text-center">
+        <div class="text-xl font-bold">{{ anzahl_fahrten }}</div>
+        <div>Fahrten insgesamt</div>
+    </div>
+    <div class="bg-white p-4 rounded shadow text-center">
+        <div class="text-xl font-bold">{{ anzahl_typen }}</div>
+        <div>Fahrstunden-Typen</div>
+    </div>
+    <div class="bg-white p-4 rounded shadow text-center">
+        <div class="text-xl font-bold">{{ anzahl_fahrlehrer }}</div>
+        <div>Fahrlehrer</div>
+    </div>
+    <div class="bg-white p-4 rounded shadow text-center">
+        <div class="text-xl font-bold">{{ anzahl_schueler }}</div>
+        <div>Fahrschüler</div>
+    </div>
+</div>
+
+<div class="flex gap-4 flex-wrap">
+    <a href="{{ url_for('buero.kassenbuch') }}" class="bg-blue-600 text-white px-4 py-2 rounded shadow">📘 Kassenbuch ansehen</a>
+    <a href="{{ url_for('buero.preise_liste') }}" class="bg-green-600 text-white px-4 py-2 rounded shadow">💶 Preise verwalten</a>
+</div>
+{% endblock %}
