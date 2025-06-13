@@ -50,3 +50,22 @@ def fahrstunden_daten():
     } for f in fahrstunden]
 
     return jsonify(events)
+
+@schueler_bp.route('/profil/beispiel/<int:id>')
+@login_required
+def beispiel_profil(id):
+    schueler = Schueler.query.get_or_404(id)
+    fahrten = Fahrstundenprotokoll.query.filter_by(schueler_id=id).order_by(Fahrstundenprotokoll.datum.desc()).all()
+    naechste_fahrt = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
+        .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
+        .order_by(Fahrstundenprotokoll.datum.asc()).first()
+    
+    alter = (datetime.utcnow().date() - schueler.geburtsdatum).days // 365 if schueler.geburtsdatum else "?"
+
+    return render_template(
+        'schueler/profil.html',
+        schueler=schueler,
+        fahrten=fahrten,
+        naechste_fahrt=naechste_fahrt,
+        alter=alter
+    )
