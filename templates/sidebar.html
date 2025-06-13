@@ -8,12 +8,25 @@
         <a href="{{ url_for('main.dashboard') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition {% if request.endpoint == 'main.dashboard' %}bg-blue-100{% endif %}">
             🏠 Dashboard
         </a>
-        <a href="{{ url_for('schueler.schueler_liste') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition">
-            👨‍🎓 Schülerverwaltung
-        </a>
-        <a href="{{ url_for('slots.slots_verwalten') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition">
-            📅 Fahrstunden-Kalender
-        </a>
+        {% if current_user.rolle.name in ['Superadmin', 'Büro', 'Fahrlehrer'] %}
+            <a href="{{ url_for('schueler.schueler_liste') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition {% if request.endpoint == 'schueler.schueler_liste' %}bg-blue-100{% endif %}">
+                👨‍🎓 Schülerverwaltung
+            </a>
+            <a href="{{ url_for('schueler.kalender') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition {% if request.endpoint == 'schueler.kalender' %}bg-blue-100{% endif %}">
+                📅 Fahrstunden-Kalender
+            </a>
+            <a href="{{ url_for('schueler.fahrstunde_anlegen') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition {% if request.endpoint == 'schueler.fahrstunde_anlegen' %}bg-blue-100{% endif %}">
+                ➕ Fahrstunde erfassen
+            </a>
+        {% endif %}
+        {% if current_user.rolle.name == 'Superadmin' %}
+            <a href="{{ url_for('buero.verwaltungsseite') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition {% if request.endpoint == 'buero.verwaltungsseite' %}bg-blue-100{% endif %}">
+                ⚙️ Verwaltung
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-100 transition {% if request.endpoint == 'auth.register' %}bg-blue-100{% endif %}">
+                🆕 Benutzer registrieren
+            </a>
+        {% endif %}
         <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-red-100 transition text-red-700 mt-4">
             🚪 Logout
         </a>
@@ -31,7 +44,14 @@
 </div>
 <div id="mobileMenu" class="md:hidden hidden bg-white px-4 py-2">
     <a href="{{ url_for('main.dashboard') }}" class="block py-2 border-b">🏠 Dashboard</a>
-    <a href="{{ url_for('schueler.schueler_liste') }}" class="block py-2 border-b">👨‍🎓 Schülerverwaltung</a>
-    <a href="{{ url_for('slots.slots_verwalten') }}" class="block py-2 border-b">📅 Kalender</a>
+    {% if current_user.rolle.name in ['Superadmin', 'Büro', 'Fahrlehrer'] %}
+        <a href="{{ url_for('schueler.schueler_liste') }}" class="block py-2 border-b">👨‍🎓 Schülerverwaltung</a>
+        <a href="{{ url_for('schueler.kalender') }}" class="block py-2 border-b">📅 Fahrstunden-Kalender</a>
+        <a href="{{ url_for('schueler.fahrstunde_anlegen') }}" class="block py-2 border-b">➕ Fahrstunde erfassen</a>
+    {% endif %}
+    {% if current_user.rolle.name == 'Superadmin' %}
+        <a href="{{ url_for('buero.verwaltungsseite') }}" class="block py-2 border-b">⚙️ Verwaltung</a>
+        <a href="{{ url_for('auth.register') }}" class="block py-2 border-b">🆕 Benutzer registrieren</a>
+    {% endif %}
     <a href="{{ url_for('auth.logout') }}" class="block py-2 text-red-600">🚪 Logout</a>
 </div>
