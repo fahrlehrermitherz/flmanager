@@ -1,19 +1,44 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import db, FahrstundenTyp
+from models import db, FahrstundenTyp, Fahrstundenprotokoll, User, Schueler, Rolle
 
 buero = Blueprint('buero', __name__, url_prefix='/buero')
 
-# Fahrstunden-Typen Übersicht
+# 📊 Büro-Dashboard
+@buero.route('/dashboard')
+@login_required
+def dashboard():
+    if current_user.rolle.name not in ['Büro', 'Superadmin']:
+        return "Nicht autorisiert", 403
+
+    anzahl_fahrten = Fahrstundenprotokoll.query.count()
+    anzahl_typen = FahrstundenTyp.query.count()
+
+    fahrlehrer_rolle = Rolle.query.filter_by(name='Fahrlehrer').first()
+    anzahl_fahrlehrer = (
+        User.query.filter_by(rolle=fahrlehrer_rolle).count() if fahrlehrer_rolle else 0
+    )
+    anzahl_schueler = Schueler.query.count()
+
+    return render_template(
+        'buero/dashboard.html',
+        anzahl_fahrten=anzahl_fahrten,
+        anzahl_typen=anzahl_typen,
+        anzahl_fahrlehrer=anzahl_fahrlehrer,
+        anzahl_schueler=anzahl_schueler
+    )
+
+# 💶 Fahrstunden-Typen Übersicht
 @buero.route('/preise')
 @login_required
 def preise():
     if current_user.rolle.name not in ['Büro', 'Superadmin']:
         return "Nicht autorisiert", 403
+
     typen = FahrstundenTyp.query.order_by(FahrstundenTyp.bezeichnung.asc()).all()
     return render_template('buero/preise.html', typen=typen)
 
-# Neuen Typ anlegen
+# 💡 Neuen Typ anlegen
 @buero.route('/preise/neu', methods=['GET', 'POST'])
 @login_required
 def preise_neu():
@@ -21,7 +46,7 @@ def preise_neu():
         return "Nicht autorisiert", 403
 
     if request.method == 'POST':
-        bezeichnung = request.form.get('bezeichnung').strip()
+        bezeichnung = request.form.get('bezeichnung', '').strip()
         minuten = request.form.get('minuten', type=int)
         minutenpreis = request.form.get('minutenpreis', type=float)
 
@@ -40,7 +65,7 @@ def preise_neu():
 
     return render_template('buero/preise_neu.html')
 
-# Typ bearbeiten
+# 📝 Typ bearbeiten
 @buero.route('/preise/edit/<int:typ_id>', methods=['GET', 'POST'])
 @login_required
 def preise_edit(typ_id):
@@ -50,7 +75,7 @@ def preise_edit(typ_id):
     typ = FahrstundenTyp.query.get_or_404(typ_id)
 
     if request.method == 'POST':
-        typ.bezeichnung = request.form.get('bezeichnung').strip()
+        typ.bezeichnung = request.form.get('bezeichnung', '').strip()
         typ.minuten = request.form.get('minuten', type=int)
         typ.minutenpreis = request.form.get('minutenpreis', type=float)
 
@@ -63,7 +88,7 @@ def preise_edit(typ_id):
 
     return render_template('buero/preise_edit.html', typ=typ)
 
-# Typ löschen
+# ❌ Typ löschen
 @buero.route('/preise/delete/<int:typ_id>', methods=['POST'])
 @login_required
 def preise_delete(typ_id):
