@@ -37,3 +37,15 @@ def fahrstunde_anlegen():
     typen = FahrstundenTyp.query.all()
 
     return render_template('schueler/fahrstunde_anlegen.html', schueler=schueler, typen=typen)
+
+@schueler_bp.route('/fahrstunden/daten')
+@login_required
+def fahrstunden_daten():
+    fahrstunden = Fahrstundenprotokoll.query.all()
+    events = [{
+        'title': f"{f.schueler.vorname} {f.schueler.nachname} - {f.typ.bezeichnung}",
+        'start': datetime.combine(f.datum, f.uhrzeit).isoformat(),
+        'end': (datetime.combine(f.datum, f.uhrzeit) + timedelta(minutes=f.dauer_minuten)).isoformat()
+    } for f in fahrstunden]
+
+    return jsonify(events)
