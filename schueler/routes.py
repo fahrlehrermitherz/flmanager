@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from models import db, Schueler, Fahrstundenprotokoll, FahrstundenTyp, User
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
-from datetime import datetime
+from datetime import datetime, timedelta
+from models import db, Schueler, Fahrstundenprotokoll, FahrstundenTyp, User
 
 schueler_bp = Blueprint('schueler', __name__)
+
 
 @schueler_bp.route('/fahrstunde/anlegen', methods=['GET', 'POST'])
 @login_required
