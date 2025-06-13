@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Fahrstunden-Typen{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">🚗 Fahrstunden-Typen</h1>
+<a href="{{ url_for('buero.preise_neu') }}" class="bg-green-600 text-white px-3 py-1 rounded">+ Neuer Typ</a>
+<table class="min-w-full mt-4 bg-white shadow rounded">
+    <thead class="bg-gray-100">
+        <tr>
+            <th class="px-4 py-2">Bezeichnung</th>
+            <th class="px-4 py-2">Minuten</th>
+            <th class="px-4 py-2">Minutenpreis (€)</th>
+            <th class="px-4 py-2">Aktion</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for typ in typen %}
+        <tr class="border-b">
+            <td class="px-4 py-2">{{ typ.bezeichnung }}</td>
+            <td class="px-4 py-2">{{ typ.minuten }}</td>
+            <td class="px-4 py-2">{{ typ.minutenpreis|round(2) }}</td>
+            <td class="px-4 py-2">
+                <a href="{{ url_for('buero.preise_edit', typ_id=typ.id) }}" class="text-blue-600">Bearbeiten</a>
+                <form action="{{ url_for('buero.preise_delete', typ_id=typ.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="text-red-600 ml-2" onclick="return confirm('Löschen?')">Löschen</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
