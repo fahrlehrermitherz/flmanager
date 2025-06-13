@@ -2,26 +2,30 @@
 {% block title %}Fahrstunden-Typen verwalten{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Fahrstunden-Typen verwalten</h1>
-<a href="{{ url_for('buero.preise_neu') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">
-    + Neuen Typ anlegen
+<h1 class="text-2xl font-bold mb-4">💶 Fahrstunden-Typen verwalten</h1>
+
+<a href="{{ url_for('buero.preise_neu') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded inline-block mb-4">
+    ➕ Neuen Typ anlegen
 </a>
 
-<table class="table-auto w-full mt-6 bg-white rounded shadow">
+<div class="overflow-x-auto">
+<table class="min-w-full bg-white border rounded shadow">
     <thead class="bg-gray-100">
         <tr>
             <th class="px-4 py-2 text-left">Bezeichnung</th>
-            <th class="px-4 py-2">Minuten</th>
-            <th class="px-4 py-2">Preis pro Minute</th>
-            <th class="px-4 py-2">Aktionen</th>
+            <th class="px-4 py-2 text-center">Minuten</th>
+            <th class="px-4 py-2 text-center">Preis pro Minute (€)</th>
+            <th class="px-4 py-2 text-center">Gesamtpreis Beispiel ({{ beispiel_minuten }} Min)</th>
+            <th class="px-4 py-2 text-center">Aktionen</th>
         </tr>
     </thead>
     <tbody>
         {% for typ in typen %}
-        <tr class="border-t">
+        <tr class="border-b">
             <td class="px-4 py-2">{{ typ.bezeichnung }}</td>
             <td class="px-4 py-2 text-center">{{ typ.minuten }}</td>
-            <td class="px-4 py-2 text-center">{{ typ.minutenpreis }} €</td>
+            <td class="px-4 py-2 text-center">{{ "%.2f"|format(typ.minutenpreis) }}</td>
+            <td class="px-4 py-2 text-center">{{ "%.2f"|format(typ.minuten * typ.minutenpreis) }} €</td>
             <td class="px-4 py-2 text-center">
                 <a href="{{ url_for('buero.preise_edit', typ_id=typ.id) }}" class="text-blue-600 hover:underline mr-2">Bearbeiten</a>
                 <form method="POST" action="{{ url_for('buero.preise_delete', typ_id=typ.id) }}" class="inline">
@@ -29,7 +33,12 @@
                 </form>
             </td>
         </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" class="px-4 py-2 text-center text-gray-500">Keine Typen vorhanden.</td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% endblock %}
