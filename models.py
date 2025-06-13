@@ -74,3 +74,22 @@ class FahrstundenTyp(db.Model):
 
     def __repr__(self):
         return f"{self.bezeichnung} ({self.minuten} Min) - {self.minutenpreis} €/Min"
+
+# models.py (Erweiterung)
+
+class KassenbuchEintrag(db.Model):
+    __tablename__ = 'kassenbuch'
+    id = db.Column(db.Integer, primary_key=True)
+    fahrstunde_id = db.Column(db.Integer, db.ForeignKey('fahrstundenprotokoll.id'), nullable=False)
+    datum = db.Column(db.Date, nullable=False)
+    fahrlehrer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    schueler_id = db.Column(db.Integer, db.ForeignKey('schueler.id'), nullable=False)
+    typ = db.Column(db.String(100), nullable=False)  # z. B. "Übungsstunde", "Nachtfahrt"
+    dauer_min = db.Column(db.Integer, nullable=False)
+    betrag = db.Column(db.Float, nullable=False)
+    zahlungsart = db.Column(db.String(20), nullable=False)  # z. B. 'bar', 'EC', 'Guthaben'
+
+    fahrlehrer = db.relationship('User')
+    schueler = db.relationship('Schueler')
+    fahrstunde = db.relationship('Fahrstundenprotokoll')
+
