@@ -6,7 +6,8 @@ from config import Config
 # Initialisierungen
 db = SQLAlchemy()
 login_manager = LoginManager()
-login_manager.login_view = "auth.login"  # Standardroute fürs Login
+login_manager.login_view = "auth.login"
+
 
 def create_app():
     app = Flask(__name__)
@@ -19,13 +20,15 @@ def create_app():
     # Blueprints importieren und registrieren
     from auth.routes import auth as auth_blueprint
     from main.routes import main as main_blueprint
+    from schueler.routes import schueler_bp as schueler_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
+    app.register_blueprint(schueler_blueprint, url_prefix='/schueler')
 
     return app
 
-# Nur für lokales Testing
+
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)
