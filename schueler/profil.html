@@ -7,6 +7,7 @@
 {% set avatar = '👩‍🎓' if schueler.geschlecht == 'weiblich' else '👨‍🎓' %}
 
 <div class="max-w-4xl mx-auto mt-6 bg-{{ farbe }} rounded-xl shadow-xl p-6 border-l-4 border-{{ textfarbe }}">
+    <!-- Avatar & Name -->
     <div class="flex items-center mb-6">
         <div class="w-20 h-20 bg-{{ textfarbe }} text-white rounded-full flex items-center justify-center text-4xl shadow-md">
             {{ avatar }}
@@ -17,10 +18,23 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+    <!-- Mobiles Avatar-Menü -->
+    <div class="mt-4 md:hidden">
+      <button onclick="toggleMenu()" class="w-full bg-{{ textfarbe }} text-white py-2 rounded-lg flex items-center justify-center shadow">
+        {{ avatar }} Menü anzeigen
+      </button>
+      <div id="avatarMenu" class="hidden mt-2 bg-white border border-{{ textfarbe }} rounded-lg shadow-md">
+        <a href="#fahrten" class="block px-4 py-2 hover:bg-gray-100">📋 Fahrstunden</a>
+        <a href="#kontakt" class="block px-4 py-2 hover:bg-gray-100">📞 Kontakt</a>
+        <a href="#infos" class="block px-4 py-2 hover:bg-gray-100">ℹ️ Infos</a>
+      </div>
+    </div>
+
+    <!-- Schülerinfos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 mt-6" id="infos">
         <p><strong>Alter:</strong> {{ alter }} Jahre</p>
         <p><strong>Geschlecht:</strong> {{ schueler.geschlecht }}</p>
-        <p><strong>Telefon:</strong> +49 {{ schueler.telefon }}</p>
+        <p id="kontakt"><strong>Telefon:</strong> +49 {{ schueler.telefon }}</p>
         <p><strong>Email:</strong> {{ schueler.email }}</p>
         <p><strong>Adresse:</strong> {{ schueler.strasse }}, {{ schueler.plz }} {{ schueler.ort }}</p>
         <p><strong>Fahrerlaubnis:</strong> {{ schueler.fahrerlaubnisklasse }}</p>
@@ -30,8 +44,9 @@
         <p><strong>Erste-Hilfe-Kurs:</strong> {{ '✅' if schueler.erste_hilfe_kurs else '❌' }}</p>
     </div>
 
+    <!-- Fahrstunden -->
     {% if fahrten %}
-    <div class="mt-6">
+    <div class="mt-8" id="fahrten">
         <h3 class="text-xl font-semibold text-{{ textfarbe }}">📋 Fahrstundenverlauf</h3>
         <ul class="mt-2 divide-y divide-gray-300">
             {% for f in fahrten %}
@@ -46,6 +61,7 @@
     <p class="mt-6 text-gray-500">Noch keine Fahrstunden eingetragen.</p>
     {% endif %}
 
+    <!-- Nächste Fahrstunde -->
     {% if naechste_fahrt %}
     <div class="mt-4 p-4 bg-green-100 border-l-4 border-green-600">
         <strong>Nächste Fahrstunde:</strong>
@@ -54,4 +70,11 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById("avatarMenu");
+    menu.classList.toggle("hidden");
+  }
+</script>
 {% endblock %}
