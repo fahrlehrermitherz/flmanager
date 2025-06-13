@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Slots Übersicht{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">📅 Fahrstunden-Slots Übersicht</h1>
+
+<!-- Kalender (Basis-Tabelle für Wochen-/Tagesübersicht) -->
+<div class="overflow-x-auto">
+  <table class="min-w-full bg-white rounded shadow">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2">Datum</th>
+        <th class="px-4 py-2">Uhrzeit</th>
+        <th class="px-4 py-2">Fahrlehrer</th>
+        <th class="px-4 py-2">Schüler</th>
+        <th class="px-4 py-2">Simulator</th>
+        <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Aktionen</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for slot in slots %}
+      <tr class="border-t">
+        <td class="px-4 py-2">{{ slot.datum.strftime('%d.%m.%Y') }}</td>
+        <td class="px-4 py-2">{{ slot.uhrzeit.strftime('%H:%M') }}</td>
+        <td class="px-4 py-2">{{ slot.fahrlehrer.vorname }} {{ slot.fahrlehrer.nachname }}</td>
+        <td class="px-4 py-2">
+          {% if slot.schueler %}
+          {{ slot.schueler.vorname }} {{ slot.schueler.nachname }}
+          {% else %}
+          -
+          {% endif %}
+        </td>
+        <td class="px-4 py-2 text-center">
+          {% if slot.simulator %}✔️{% else %}-{% endif %}
+        </td>
+        <td class="px-4 py-2">{{ slot.status }}</td>
+        <td class="px-4 py-2">
+          {% if slot.simulator and not slot.bestätigt %}
+          <form action="{{ url_for('buero.slot_bestaetigen', slot_id=slot.id) }}" method="POST" class="inline">
+            <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded">Bestätigen</button>
+          </form>
+          {% else %}
+          <span class="text-gray-400">---</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
