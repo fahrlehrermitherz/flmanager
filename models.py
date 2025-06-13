@@ -90,4 +90,5 @@ class KassenbuchEintrag(db.Model):
     zahlungsart = db.Column(db.String(20), nullable=False)  # z. B. 'bar', 'EC', 'Guthaben'
 
     fahrlehrer = db.relationship('User')
-    schueler = db.relationship('
+    schueler = db.relationship('Schueler')
+    fahrstunde = db.relationship('Fahrstundenprotokoll')
