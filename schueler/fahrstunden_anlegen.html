@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %} Fahrstunde anlegen {% endblock %}
+
+{% block content %}
+<h2>Neue Fahrstunde erfassen</h2>
+
+<form method="POST">
+  <label>Schüler auswählen:</label>
+  <select name="schueler_id" required>
+    {% for s in schueler %}
+      <option value="{{ s.id }}">{{ s.vorname }} {{ s.nachname }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Fahrstundentyp:</label>
+  <select name="typ_id" required>
+    {% for t in typen %}
+      <option value="{{ t.id }}">{{ t.bezeichnung }} ({{ t.minuten }} Min)</option>
+    {% endfor %}
+  </select>
+
+  <label>Datum:</label>
+  <input type="date" name="datum" required>
+
+  <label>Uhrzeit:</label>
+  <input type="time" name="uhrzeit" required>
+
+  <label>Dauer (Minuten):</label>
+  <input type="number" name="dauer_minuten" required>
+
+  <label>Inhalt der Fahrstunde:</label>
+  <textarea name="inhalt" required></textarea>
+
+  <label>Bezahlung:</label>
+  <select name="bezahlt" required>
+    <option value="bar">Bar</option>
+    <option value="EC">EC</option>
+    <option value="Guthaben">Guthaben</option>
+  </select>
+
+  <button type="submit">Fahrstunde speichern</button>
+</form>
+{% endblock %}
