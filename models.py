@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_login import UserMixin
 
+
 db = SQLAlchemy()
 
 # Rollen: Superadmin, Fahrlehrer, Büro, Fahrschüler
@@ -47,6 +48,17 @@ class Schueler(db.Model):
     erste_hilfe_kurs = db.Column(db.Boolean, default=False)
     sehtest = db.Column(db.Boolean, default=False)
 
+# Definition der Fahrstundentypen
+class FahrstundenTyp(db.Model):
+    __tablename__ = 'fahrstundentypen'
+    id = db.Column(db.Integer, primary_key=True)
+    bezeichnung = db.Column(db.String(100), nullable=False)
+    minuten = db.Column(db.Integer, nullable=False)
+    minutenpreis = db.Column(db.Numeric(5, 2), nullable=False)
+
+    def __repr__(self):
+        return f"{self.bezeichnung} ({self.minuten} Min) - {self.minutenpreis} €/Min"
+
 # Fahrstundenprotokoll
 class Fahrstundenprotokoll(db.Model):
     __tablename__ = 'fahrstundenprotokoll'
@@ -64,19 +76,7 @@ class Fahrstundenprotokoll(db.Model):
     fahrlehrer = db.relationship('User', backref='durchgefuehrte_fahrten')
     typ = db.relationship('FahrstundenTyp', backref='protokolle')
 
-# Definition der Fahrstundentypen
-class FahrstundenTyp(db.Model):
-    __tablename__ = 'fahrstundentypen'
-    id = db.Column(db.Integer, primary_key=True)
-    bezeichnung = db.Column(db.String(100), nullable=False)
-    minuten = db.Column(db.Integer, nullable=False)
-    minutenpreis = db.Column(db.Numeric(5, 2), nullable=False)
-
-    def __repr__(self):
-        return f"{self.bezeichnung} ({self.minuten} Min) - {self.minutenpreis} €/Min"
-
-# models.py (Erweiterung)
-
+# Erweiterung für das Kassenbuch
 class KassenbuchEintrag(db.Model):
     __tablename__ = 'kassenbuch'
     id = db.Column(db.Integer, primary_key=True)
@@ -90,6 +90,4 @@ class KassenbuchEintrag(db.Model):
     zahlungsart = db.Column(db.String(20), nullable=False)  # z. B. 'bar', 'EC', 'Guthaben'
 
     fahrlehrer = db.relationship('User')
-    schueler = db.relationship('Schueler')
-    fahrstunde = db.relationship('Fahrstundenprotokoll')
-
+    schueler = db.relationship('
