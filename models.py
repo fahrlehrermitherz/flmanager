@@ -92,3 +92,17 @@ class KassenbuchEintrag(db.Model):
     fahrlehrer = db.relationship('User')
     schueler = db.relationship('Schueler')
     fahrstunde = db.relationship('Fahrstundenprotokoll')
+
+class Slot(db.Model):
+    __tablename__ = 'slots'
+    id = db.Column(db.Integer, primary_key=True)
+    datum = db.Column(db.Date, nullable=False)
+    uhrzeit = db.Column(db.Time, nullable=False)
+    fahrlehrer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    schueler_id = db.Column(db.Integer, db.ForeignKey('schueler.id'), nullable=True)
+    simulator = db.Column(db.Boolean, default=False)
+    vergeben = db.Column(db.Boolean, default=False)
+    bestätigt = db.Column(db.Boolean, default=False)
+
+    fahrlehrer = db.relationship('User', backref='slots')
+    schueler = db.relationship('Schueler', backref='slots')
