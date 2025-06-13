@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
@@ -13,7 +14,7 @@ class Rolle(db.Model):
         return f"<Rolle {self.name}>"
 
 # Benutzer-Login (z. B. Fahrlehrer, Bürokräfte etc.)
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     vorname = db.Column(db.String(100), nullable=False)
@@ -24,7 +25,7 @@ class User(db.Model):
 
     rolle = db.relationship('Rolle', backref='benutzer')
 
-# Schülerdaten (vereinfachte Stammdaten)
+# Schülerdaten (erweitert für Profilfunktion)
 class Schueler(db.Model):
     __tablename__ = 'schueler'
     id = db.Column(db.Integer, primary_key=True)
@@ -34,6 +35,17 @@ class Schueler(db.Model):
     telefon = db.Column(db.String(50), nullable=True)
     email = db.Column(db.String(120), nullable=True)
     erstellt_am = db.Column(db.DateTime, default=datetime.utcnow)
+
+    geschlecht = db.Column(db.String(10), nullable=False)  # 'männlich' oder 'weiblich'
+    strasse = db.Column(db.String(150), nullable=False)
+    plz = db.Column(db.String(10), nullable=False)
+    ort = db.Column(db.String(100), nullable=False)
+    fahrerlaubnisklasse = db.Column(db.String(20), nullable=False)
+    anmeldecode = db.Column(db.String(10), unique=True, nullable=False)
+    sehhilfe = db.Column(db.Boolean, default=False)
+    profilbild = db.Column(db.String(255), nullable=True)
+    erste_hilfe_kurs = db.Column(db.Boolean, default=False)
+    sehtest = db.Column(db.Boolean, default=False)
 
 # Fahrstundenprotokoll
 class Fahrstundenprotokoll(db.Model):
