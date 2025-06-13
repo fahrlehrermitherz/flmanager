@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Profil: {{ schueler.vorname }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-6 bg-white rounded shadow p-6">
+    <h2 class="text-2xl font-bold text-blue-700 mb-4">👤 Profil von {{ schueler.vorname }} {{ schueler.nachname }}</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+        <p><strong>Alter:</strong> {{ alter }} Jahre</p>
+        <p><strong>Geschlecht:</strong> {{ schueler.geschlecht }}</p>
+        <p><strong>Telefon:</strong> +49 {{ schueler.telefon }}</p>
+        <p><strong>Email:</strong> {{ schueler.email }}</p>
+        <p><strong>Adresse:</strong> {{ schueler.strasse }}, {{ schueler.plz }} {{ schueler.ort }}</p>
+        <p><strong>Fahrerlaubnis:</strong> {{ schueler.fahrerlaubnisklasse }}</p>
+        <p><strong>Sehhilfe:</strong> {{ '👓 Ja' if schueler.sehhilfe else 'Nein' }}</p>
+        <p><strong>Anmeldecode:</strong> {{ schueler.anmeldecode }}</p>
+        <p><strong>Sehtest:</strong> {{ '✅' if schueler.sehtest else '❌' }}</p>
+        <p><strong>Erste-Hilfe-Kurs:</strong> {{ '✅' if schueler.erste_hilfe_kurs else '❌' }}</p>
+    </div>
+
+    {% if fahrten %}
+    <div class="mt-6">
+        <h3 class="text-xl font-semibold text-blue-600">📋 Fahrstundenverlauf</h3>
+        <ul class="mt-2 divide-y">
+            {% for f in fahrten %}
+            <li class="py-2">
+                {{ f.datum.strftime('%d.%m.%Y') }} – {{ f.uhrzeit.strftime('%H:%M') }} Uhr –
+                {{ f.typ.bezeichnung }} ({{ f.dauer_minuten }} Min) – Bezahlt: {{ f.bezahlt }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p class="mt-6 text-gray-500">Noch keine Fahrstunden eingetragen.</p>
+    {% endif %}
+
+    {% if naechste_fahrt %}
+    <div class="mt-4 p-4 bg-green-100 border-l-4 border-green-600">
+        <strong>Nächste Fahrstunde:</strong>
+        {{ naechste_fahrt.datum.strftime('%d.%m.%Y') }} um {{ naechste_fahrt.uhrzeit.strftime('%H:%M') }} –
+        {{ naechste_fahrt.typ.bezeichnung }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
