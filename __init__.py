@@ -6,7 +6,7 @@ from models import db
 
 # LoginManager vorbereiten
 login_manager = LoginManager()
-login_manager.login_view = 'auth.login'  # Redirect wenn nicht eingeloggt
+login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
 
 def create_app():
@@ -21,11 +21,11 @@ def create_app():
     from auth.routes import auth
     from main.routes import main
     from schueler.routes import schueler
-    from buero.routes import buero  # <== NEU
+    from buero.routes import buero
 
     app.register_blueprint(auth)
     app.register_blueprint(main)
     app.register_blueprint(schueler)
-    app.register_blueprint(buero)  # <== NEU
+    app.register_blueprint(buero)
 
     return app
