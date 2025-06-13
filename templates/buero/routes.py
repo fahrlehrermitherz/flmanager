@@ -1,9 +1,11 @@
+# buero/routes.py
 from flask import Blueprint, render_template, request, make_response
-from datetime import datetime
-from models import db, Fahrstundenprotokoll, User, Schueler
 from flask_login import login_required, current_user
-import csv
+from datetime import datetime
 from io import StringIO
+import csv
+
+from models import db, Fahrstundenprotokoll, User, Schueler
 
 buero = Blueprint('buero', __name__, url_prefix='/buero')
 
@@ -31,7 +33,7 @@ def kassenbuch():
 
     fahrten = query.order_by(Fahrstundenprotokoll.datum.desc()).all()
 
-    # 🔄 Typenlogik zentral auslagern – später evtl. DB-Tabelle „Fahrstundentypen“
+    # Typenlogik zentral
     def get_typ(dauer, inhalt):
         inhalt_lower = inhalt.lower()
         if "nacht" in inhalt_lower:
@@ -45,8 +47,7 @@ def kassenbuch():
         else:
             return "Übungsfahrt", 1.0
 
-    # 🔢 Preisbasis – später über Settings-Model steuerbar machen
-    minutenpreis_basis = 1.00
+    minutenpreis_basis = 1.00  # später dynamisch aus DB
 
     kassenbuch = []
     for fahrt in fahrten:
@@ -101,14 +102,15 @@ def export_kassenbuch():
         else:
             return "Übungsfahrt", 1.0
 
-    minutenpreis = 1.00  # oder später dynamisch
+    minutenpreis_basis = 1.00
+
     csv_output = StringIO()
     writer = csv.writer(csv_output)
     writer.writerow(["Datum", "Fahrlehrer", "Schüler", "Typ", "Dauer (Min)", "Zahlungsart", "Betrag (€)"])
 
     for fahrt in fahrten:
         typ_name, multiplikator = get_typ(fahrt.dauer_minuten, fahrt.inhalt)
-        betrag = fahrt.dauer_minuten * minutenpreis * multiplikator
+        betrag = fahrt.dauer_minuten * minutenpreis_basis * multiplikator
         writer.writerow([
             fahrt.datum.strftime('%d.%m.%Y'),
             f"{fahrt.fahrlehrer.vorname} {fahrt.fahrlehrer.nachname}",
