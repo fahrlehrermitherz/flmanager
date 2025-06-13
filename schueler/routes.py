@@ -5,7 +5,7 @@ from models import db, Schueler, Fahrstundenprotokoll, FahrstundenTyp, User
 
 schueler_bp = Blueprint('schueler', __name__)
 
-
+# 🔧 Fahrstunde anlegen
 @schueler_bp.route('/fahrstunde/anlegen', methods=['GET', 'POST'])
 @login_required
 def fahrstunde_anlegen():
@@ -39,6 +39,8 @@ def fahrstunde_anlegen():
 
     return render_template('schueler/fahrstunde_anlegen.html', schueler=schueler, typen=typen)
 
+
+# 📅 Daten für Kalender (JSON)
 @schueler_bp.route('/fahrstunden/daten')
 @login_required
 def fahrstunden_daten():
@@ -51,16 +53,27 @@ def fahrstunden_daten():
 
     return jsonify(events)
 
-@schueler_bp.route('/profil/beispiel/<int:id>')
+
+# 🧍‍♂️🧍‍♀️ Profilseite für einen Schüler
+@schueler_bp.route('/profil/<int:id>')
 @login_required
-def beispiel_profil(id):
+def schueler_profil(id):
     schueler = Schueler.query.get_or_404(id)
-    fahrten = Fahrstundenprotokoll.query.filter_by(schueler_id=id).order_by(Fahrstundenprotokoll.datum.desc()).all()
+    fahrten = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
+        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc())\
+        .all()
+
     naechste_fahrt = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
         .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
-        .order_by(Fahrstundenprotokoll.datum.asc()).first()
-    
-    alter = (datetime.utcnow().date() - schueler.geburtsdatum).days // 365 if schueler.geburtsdatum else "?"
+        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc())\
+        .first()
+
+    alter = None
+    if schueler.geburtsdatum:
+        today = datetime.today()
+        alter = today.year - schueler.geburtsdatum.year - (
+            (today.month, today.day) < (schueler.geburtsdatum.month, schueler.geburtsdatum.day)
+        )
 
     return render_template(
         'schueler/profil.html',
