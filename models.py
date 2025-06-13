@@ -12,7 +12,7 @@ class Rolle(db.Model):
     def __repr__(self):
         return f"<Rolle {self.name}>"
 
-# Benutzer-Login (z. B. für Fahrlehrer, Bürokräfte etc.)
+# Benutzer-Login (z. B. Fahrlehrer, Bürokräfte etc.)
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -21,6 +21,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     passwort = db.Column(db.String(255), nullable=False)
     rolle_id = db.Column(db.Integer, db.ForeignKey('rollen.id'), nullable=False)
+
     rolle = db.relationship('Rolle', backref='benutzer')
 
 # Schülerdaten (vereinfachte Stammdaten)
@@ -43,14 +44,15 @@ class Fahrstundenprotokoll(db.Model):
     uhrzeit = db.Column(db.Time, nullable=False)
     dauer_minuten = db.Column(db.Integer, nullable=False)
     inhalt = db.Column(db.String(255), nullable=False)
-    bezahlt = db.Column(db.String(20), nullable=False)  # z. B. 'bar', 'EC', 'Guthaben'
+    bezahlt = db.Column(db.String(20), nullable=False)  # z.B. 'bar', 'EC', 'Guthaben'
     fahrlehrer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    typ_id = db.Column(db.Integer, db.ForeignKey('fahrstundentypen.id'), nullable=False)
 
     schueler = db.relationship('Schueler', backref='fahrten')
     fahrlehrer = db.relationship('User', backref='durchgefuehrte_fahrten')
+    typ = db.relationship('FahrstundenTyp', backref='protokolle')
 
-# models.py (Erweiterung)
-
+# Definition der Fahrstundentypen
 class FahrstundenTyp(db.Model):
     __tablename__ = 'fahrstundentypen'
     id = db.Column(db.Integer, primary_key=True)
@@ -60,8 +62,3 @@ class FahrstundenTyp(db.Model):
 
     def __repr__(self):
         return f"{self.bezeichnung} ({self.minuten} Min) - {self.minutenpreis} €/Min"
-
-# Beispielhafte Beziehung in Fahrstundenprotokoll (ergänzen):
-# typ_id = db.Column(db.Integer, db.ForeignKey('fahrstundentypen.id'))
-# typ = db.relationship('FahrstundenTyp', backref='protokolle')
-
