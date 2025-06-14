@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Slots verwalten{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">📅 Alle Slots verwalten</h1>
+
+<a href="{{ url_for('buero.slots_neu') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded inline-block mb-4">
+    + Neuen Slot erstellen
+</a>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white border rounded shadow text-sm">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-4 py-2 text-left">Datum</th>
+                <th class="px-4 py-2 text-left">Uhrzeit</th>
+                <th class="px-4 py-2 text-left">Fahrlehrer</th>
+                <th class="px-4 py-2 text-center">Simulator</th>
+                <th class="px-4 py-2 text-center">Vergeben</th>
+                <th class="px-4 py-2 text-center">Bestätigt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for slot in slots %}
+            <tr class="border-t">
+                <td class="px-4 py-2">{{ slot.datum.strftime('%d.%m.%Y') }}</td>
+                <td class="px-4 py-2">{{ slot.uhrzeit.strftime('%H:%M') }}</td>
+                <td class="px-4 py-2">{{ slot.fahrlehrer.vorname }} {{ slot.fahrlehrer.nachname }}</td>
+                <td class="px-4 py-2 text-center">
+                    {% if slot.simulator %}✅{% else %}❌{% endif %}
+                </td>
+                <td class="px-4 py-2 text-center">
+                    {% if slot.vergeben %}✅{% else %}❌{% endif %}
+                </td>
+                <td class="px-4 py-2 text-center">
+                    {% if slot.bestätigt %}✅{% else %}❌{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
