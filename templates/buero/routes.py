@@ -1,102 +1,97 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import db, FahrstundenTyp, Fahrstundenprotokoll, User, Schueler, Rolle
+from models import db, Slot, User
+from datetime import datetime
 
 buero = Blueprint('buero', __name__, url_prefix='/buero')
 
-# 📊 Büro-Dashboard
-@buero.route('/dashboard')
+# ✅ Slot-Liste
+@buero.route('/slots')
 @login_required
-def dashboard():
+def slots_liste():
     if current_user.rolle.name not in ['Büro', 'Superadmin']:
         return "Nicht autorisiert", 403
 
-    anzahl_fahrten = Fahrstundenprotokoll.query.count()
-    anzahl_typen = FahrstundenTyp.query.count()
+    slots = Slot.query.join(User).order_by(Slot.datum.desc(), Slot.uhrzeit).all()
+    return render_template('buero/slots_liste.html', slots=slots)
 
-    fahrlehrer_rolle = Rolle.query.filter_by(name='Fahrlehrer').first()
-    anzahl_fahrlehrer = (
-        User.query.filter_by(rolle=fahrlehrer_rolle).count() if fahrlehrer_rolle else 0
-    )
-    anzahl_schueler = Schueler.query.count()
-
-    return render_template(
-        'buero/dashboard.html',
-        anzahl_fahrten=anzahl_fahrten,
-        anzahl_typen=anzahl_typen,
-        anzahl_fahrlehrer=anzahl_fahrlehrer,
-        anzahl_schueler=anzahl_schueler
-    )
-
-# 💶 Fahrstunden-Typen Übersicht
-@buero.route('/preise')
+# ✅ Neuen Slot anlegen
+@buero.route('/slots/neu', methods=['GET', 'POST'])
 @login_required
-def preise():
+def slots_neu():
     if current_user.rolle.name not in ['Büro', 'Superadmin']:
         return "Nicht autorisiert", 403
 
-    typen = FahrstundenTyp.query.order_by(FahrstundenTyp.bezeichnung.asc()).all()
-    return render_template('buero/preise.html', typen=typen)
-
-# 💡 Neuen Typ anlegen
-@buero.route('/preise/neu', methods=['GET', 'POST'])
-@login_required
-def preise_neu():
-    if current_user.rolle.name not in ['Büro', 'Superadmin']:
-        return "Nicht autorisiert", 403
+    fahrlehrer = User.query.filter(User.rolle.has(name='Fahrlehrer')).all()
 
     if request.method == 'POST':
-        bezeichnung = request.form.get('bezeichnung', '').strip()
-        minuten = request.form.get('minuten', type=int)
-        minutenpreis = request.form.get('minutenpreis', type=float)
+        datum_str = request.form.get('datum')
+        uhrzeit_str = request.form.get('uhrzeit')
+        fahrlehrer_id = request.form.get('fahrlehrer_id', type=int)
+        simulator = 'simulator' in request.form
 
-        if not bezeichnung or not minuten or minuten <= 0 or not minutenpreis or minutenpreis < 0:
-            flash('Bitte alle Felder korrekt ausfüllen.', 'danger')
-        else:
-            neuer_typ = FahrstundenTyp(
-                bezeichnung=bezeichnung,
-                minuten=minuten,
-                minutenpreis=minutenpreis
+        try:
+            datum = datetime.strptime(datum_str, '%Y-%m-%d').date()
+            uhrzeit = datetime.strptime(uhrzeit_str, '%H:%M').time()
+            neuer_slot = Slot(
+                datum=datum,
+                uhrzeit=uhrzeit,
+                fahrlehrer_id=fahrlehrer_id,
+                simulator=simulator
             )
-            db.session.add(neuer_typ)
+            db.session.add(neuer_slot)
             db.session.commit()
-            flash('Neuer Fahrstunden-Typ wurde gespeichert.', 'success')
-            return redirect(url_for('buero.preise'))
+            flash('Neuer Slot wurde erstellt.', 'success')
+            return redirect(url_for('buero.slots_liste'))
+        except Exception as e:
+            flash(f'Fehler beim Anlegen: {e}', 'danger')
 
-    return render_template('buero/preise_neu.html')
+    return render_template('buero/slots_form.html', fahrlehrer=fahrlehrer, mode='neu')
 
-# 📝 Typ bearbeiten
-@buero.route('/preise/edit/<int:typ_id>', methods=['GET', 'POST'])
+# ✅ Slot bearbeiten
+@buero.route('/slots/edit/<int:slot_id>', methods=['GET', 'POST'])
 @login_required
-def preise_edit(typ_id):
+def slots_edit(slot_id):
     if current_user.rolle.name not in ['Büro', 'Superadmin']:
         return "Nicht autorisiert", 403
 
-    typ = FahrstundenTyp.query.get_or_404(typ_id)
+    slot = Slot.query.get_or_404(slot_id)
+    fahrlehrer = User.query.filter(User.rolle.has(name='Fahrlehrer')).all()
 
     if request.method == 'POST':
-        typ.bezeichnung = request.form.get('bezeichnung', '').strip()
-        typ.minuten = request.form.get('minuten', type=int)
-        typ.minutenpreis = request.form.get('minutenpreis', type=float)
+        slot.datum = datetime.strptime(request.form.get('datum'), '%Y-%m-%d').date()
+        slot.uhrzeit = datetime.strptime(request.form.get('uhrzeit'), '%H:%M').time()
+        slot.fahrlehrer_id = request.form.get('fahrlehrer_id', type=int)
+        slot.simulator = 'simulator' in request.form
 
-        if not typ.bezeichnung or not typ.minuten or typ.minuten <= 0 or not typ.minutenpreis or typ.minutenpreis < 0:
-            flash('Bitte alle Felder korrekt ausfüllen.', 'danger')
-        else:
-            db.session.commit()
-            flash('Fahrstunden-Typ wurde aktualisiert.', 'success')
-            return redirect(url_for('buero.preise'))
+        db.session.commit()
+        flash('Slot wurde aktualisiert.', 'success')
+        return redirect(url_for('buero.slots_liste'))
 
-    return render_template('buero/preise_edit.html', typ=typ)
+    return render_template('buero/slots_form.html', fahrlehrer=fahrlehrer, slot=slot, mode='edit')
 
-# ❌ Typ löschen
-@buero.route('/preise/delete/<int:typ_id>', methods=['POST'])
+# ✅ Slot löschen
+@buero.route('/slots/delete/<int:slot_id>', methods=['POST'])
 @login_required
-def preise_delete(typ_id):
+def slots_delete(slot_id):
     if current_user.rolle.name not in ['Büro', 'Superadmin']:
         return "Nicht autorisiert", 403
 
-    typ = FahrstundenTyp.query.get_or_404(typ_id)
-    db.session.delete(typ)
+    slot = Slot.query.get_or_404(slot_id)
+    db.session.delete(slot)
     db.session.commit()
-    flash('Fahrstunden-Typ wurde gelöscht.', 'info')
-    return redirect(url_for('buero.preise'))
+    flash('Slot wurde gelöscht.', 'info')
+    return redirect(url_for('buero.slots_liste'))
+
+# ✅ Slot bestätigen
+@buero.route('/slots/confirm/<int:slot_id>', methods=['POST'])
+@login_required
+def slots_confirm(slot_id):
+    if current_user.rolle.name not in ['Büro', 'Superadmin']:
+        return "Nicht autorisiert", 403
+
+    slot = Slot.query.get_or_404(slot_id)
+    slot.bestätigt = True
+    db.session.commit()
+    flash('Slot wurde bestätigt.', 'success')
+    return redirect(url_for('buero.slots_liste'))
