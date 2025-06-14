@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Kalender{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">📅 Kalender</h1>
+
+<div class="overflow-x-auto bg-white rounded shadow">
+    <table class="table-auto w-full text-sm">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-4 py-2">Datum</th>
+                <th class="px-4 py-2">Uhrzeit</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Aktion</th>
+            </tr>
+        </thead>
+        <tbody id="slot-table">
+            <!-- Dynamisch per JS gefüllt -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch("/calendar/slots")
+            .then(response => response.json())
+            .then(slots => {
+                const tbody = document.getElementById("slot-table");
+                slots.forEach(slot => {
+                    const row = document.createElement("tr");
+                    row.classList.add("border-t");
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${slot.date}</td>
+                        <td class="px-4 py-2">${slot.time}</td>
+                        <td class="px-4 py-2">${slot.status}</td>
+                        <td class="px-4 py-2">
+                            ${slot.status === "frei" ? 
+                                `<button onclick="bookSlot(${slot.id})" class='bg-blue-600 text-white px-2 py-1 rounded'>Buchen</button>` 
+                                : "<span class='text-gray-500'>Nicht verfügbar</span>"}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
+    });
+
+    function bookSlot(slotId) {
+        fetch("/calendar/book", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ slot_id: slotId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        });
+    }
+</script>
+{% endblock %}
