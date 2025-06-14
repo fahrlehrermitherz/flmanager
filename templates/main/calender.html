@@ -2,47 +2,50 @@
 {% block title %}Kalender{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">📅 Kalender</h1>
+<h1 class="text-2xl font-bold mb-4">📅 Fahrstunden-Kalender</h1>
 
-<div class="overflow-x-auto bg-white rounded shadow">
-    <table class="table-auto w-full text-sm">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="px-4 py-2">Datum</th>
-                <th class="px-4 py-2">Uhrzeit</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2">Aktion</th>
-            </tr>
-        </thead>
-        <tbody id="slot-table">
-            <!-- Dynamisch per JS gefüllt -->
-        </tbody>
-    </table>
+<div id="slot-container" class="space-y-2">
+    <!-- Slots werden hier dynamisch eingefügt -->
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
+    fetchSlots();
+
+    function fetchSlots() {
         fetch("/calendar/slots")
             .then(response => response.json())
             .then(slots => {
-                const tbody = document.getElementById("slot-table");
+                const container = document.getElementById("slot-container");
+                container.innerHTML = ""; // leeren
+
+                if (slots.length === 0) {
+                    container.innerHTML = "<p class='text-gray-600'>Keine Slots vorhanden.</p>";
+                }
+
                 slots.forEach(slot => {
-                    const row = document.createElement("tr");
-                    row.classList.add("border-t");
-                    row.innerHTML = `
-                        <td class="px-4 py-2">${slot.date}</td>
-                        <td class="px-4 py-2">${slot.time}</td>
-                        <td class="px-4 py-2">${slot.status}</td>
-                        <td class="px-4 py-2">
-                            ${slot.status === "frei" ? 
-                                `<button onclick="bookSlot(${slot.id})" class='bg-blue-600 text-white px-2 py-1 rounded'>Buchen</button>` 
-                                : "<span class='text-gray-500'>Nicht verfügbar</span>"}
-                        </td>
+                    const div = document.createElement("div");
+                    div.className = "p-4 bg-white rounded shadow flex justify-between items-center";
+                    div.innerHTML = `
+                        <div>
+                            <strong>${slot.date}</strong> um <strong>${slot.time}</strong> – Status: <em>${slot.status}</em>
+                        </div>
+                        ${slot.status === "frei" ? `
+                        <button class="bg-blue-600 text-white px-3 py-1 rounded book-btn" data-id="${slot.id}">
+                            Buchen
+                        </button>` : `<span class="text-gray-500">Nicht buchbar</span>`}
                     `;
-                    tbody.appendChild(row);
+                    container.appendChild(div);
+                });
+
+                document.querySelectorAll(".book-btn").forEach(button => {
+                    button.addEventListener("click", function() {
+                        const slotId = this.getAttribute("data-id");
+                        bookSlot(slotId);
+                    });
                 });
             });
-    });
+    }
 
     function bookSlot(slotId) {
         fetch("/calendar/book", {
@@ -55,8 +58,9 @@
         .then(response => response.json())
         .then(data => {
             alert(data.message);
-            location.reload();
+            fetchSlots(); // Neu laden
         });
     }
+});
 </script>
 {% endblock %}
