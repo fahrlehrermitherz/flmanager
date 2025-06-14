@@ -4,63 +4,131 @@
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">📅 Fahrstunden-Kalender</h1>
 
-<div id="slot-container" class="space-y-2">
-    <!-- Slots werden hier dynamisch eingefügt -->
+<div class="flex gap-2 mb-4">
+    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="day">Tag</button>
+    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="week">Woche</button>
+    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="month">Monat</button>
+</div>
+
+<div id="calendar-container" class="overflow-x-auto">
+    <!-- Dynamisch generierte Tabelle -->
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    fetchSlots();
+    let currentView = "week";
+    let today = new Date();
 
-    function fetchSlots() {
-        fetch("/calendar/slots")
-            .then(response => response.json())
-            .then(slots => {
-                const container = document.getElementById("slot-container");
-                container.innerHTML = ""; // leeren
-
-                if (slots.length === 0) {
-                    container.innerHTML = "<p class='text-gray-600'>Keine Slots vorhanden.</p>";
-                }
-
-                slots.forEach(slot => {
-                    const div = document.createElement("div");
-                    div.className = "p-4 bg-white rounded shadow flex justify-between items-center";
-                    div.innerHTML = `
-                        <div>
-                            <strong>${slot.date}</strong> um <strong>${slot.time}</strong> – Status: <em>${slot.status}</em>
-                        </div>
-                        ${slot.status === "frei" ? `
-                        <button class="bg-blue-600 text-white px-3 py-1 rounded book-btn" data-id="${slot.id}">
-                            Buchen
-                        </button>` : `<span class="text-gray-500">Nicht buchbar</span>`}
-                    `;
-                    container.appendChild(div);
-                });
-
-                document.querySelectorAll(".book-btn").forEach(button => {
-                    button.addEventListener("click", function() {
-                        const slotId = this.getAttribute("data-id");
-                        bookSlot(slotId);
-                    });
-                });
-            });
+    function formatDate(date) {
+        return date.toISOString().split("T")[0];
     }
 
-    function bookSlot(slotId) {
-        fetch("/calendar/book", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ slot_id: slotId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            fetchSlots(); // Neu laden
+    function generateDates(view) {
+        let dates = [];
+        if (view === "day") {
+            dates.push(formatDate(today));
+        } else if (view === "week") {
+            let start = new Date(today);
+            start.setDate(start.getDate() - start.getDay() + 1); // Montag
+            for (let i = 0; i < 7; i++) {
+                let d = new Date(start);
+                d.setDate(start.getDate() + i);
+                dates.push(formatDate(d));
+            }
+        } else if (view === "month") {
+            let y = today.getFullYear();
+            let m = today.getMonth();
+            let d = new Date(y, m, 1);
+            while (d.getMonth() === m) {
+                dates.push(formatDate(new Date(d)));
+                d.setDate(d.getDate() + 1);
+            }
+        }
+        return dates;
+    }
+
+    function renderCalendar(view) {
+        const container = document.getElementById("calendar-container");
+        container.innerHTML = "";
+
+        const dates = generateDates(view);
+        let table = document.createElement("table");
+        table.className = "table-auto min-w-full bg-white rounded shadow";
+
+        // Table head
+        let thead = document.createElement("thead");
+        thead.innerHTML = `
+            <tr class="bg-gray-100">
+                <th class="px-4 py-2 text-left">Datum</th>
+                <th class="px-4 py-2 text-left">Zeit</th>
+                <th class="px-4 py-2 text-left">Fahrlehrer</th>
+                <th class="px-4 py-2 text-left">Simulator</th>
+                <th class="px-4 py-2 text-left">Status</th>
+                <th class="px-4 py-2 text-left">Aktion</th>
+            </tr>`;
+        table.appendChild(thead);
+
+        // Table body
+        let tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+        container.appendChild(table);
+
+        dates.forEach(date => {
+            fetch(`/calendar/slots?date=${date}`)
+                .then(response => response.json())
+                .then(slots => {
+                    if (slots.length === 0) {
+                        let row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td class="px-4 py-2">${date}</td>
+                            <td class="px-4 py-2 text-gray-400" colspan="5">Keine Slots</td>`;
+                        tbody.appendChild(row);
+                    } else {
+                        slots.forEach(slot => {
+                            let row = document.createElement("tr");
+                            row.innerHTML = `
+                                <td class="px-4 py-2">${slot.date}</td>
+                                <td class="px-4 py-2">${slot.time}</td>
+                                <td class="px-4 py-2">${slot.fahrlehrer || '-'}</td>
+                                <td class="px-4 py-2">${slot.simulator ? '🖥️' : '-'}</td>
+                                <td class="px-4 py-2">${slot.status}</td>
+                                <td class="px-4 py-2">
+                                    ${slot.status === "frei" ? `<button class="bg-blue-600 text-white px-2 py-1 rounded book-btn" data-id="${slot.id}">Buchen</button>` : `<span class="text-gray-400">Nicht buchbar</span>`}
+                                </td>`;
+                            tbody.appendChild(row);
+                        });
+                        attachBookHandlers();
+                    }
+                });
         });
     }
+
+    function attachBookHandlers() {
+        document.querySelectorAll(".book-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                const slotId = this.getAttribute("data-id");
+                fetch("/calendar/book", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ slot_id: slotId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    renderCalendar(currentView);
+                });
+            });
+        });
+    }
+
+    document.querySelectorAll(".view-toggle").forEach(btn => {
+        btn.addEventListener("click", function() {
+            currentView = this.getAttribute("data-view");
+            renderCalendar(currentView);
+        });
+    });
+
+    renderCalendar(currentView);
 });
 </script>
 {% endblock %}
