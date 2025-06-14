@@ -4,15 +4,16 @@
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">📅 Fahrstunden-Kalender</h1>
 
-<div class="flex gap-2 mb-4">
-    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="day">Tag</button>
-    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="week">Woche</button>
-    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="month">Monat</button>
+<div class="flex flex-wrap gap-2 mb-4">
+    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="day">📅 Tag</button>
+    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="week">🗓️ Woche</button>
+    <button class="view-toggle bg-blue-600 text-white px-3 py-1 rounded" data-view="month">📆 Monat</button>
+    <button id="prev" class="bg-gray-400 text-white px-3 py-1 rounded">⏮️ Zurück</button>
+    <button id="next" class="bg-gray-400 text-white px-3 py-1 rounded">⏭️ Weiter</button>
+    <button id="today" class="bg-green-600 text-white px-3 py-1 rounded">📌 Heute</button>
 </div>
 
-<div id="calendar-container" class="overflow-x-auto">
-    <!-- Dynamisch generierte Tabelle -->
-</div>
+<div id="calendar-container" class="overflow-x-auto"></div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -23,13 +24,18 @@ document.addEventListener("DOMContentLoaded", function() {
         return date.toISOString().split("T")[0];
     }
 
+    function formatGermanDate(dateStr) {
+        const [y, m, d] = dateStr.split("-");
+        return `${d}.${m}.${y}`;
+    }
+
     function generateDates(view) {
         let dates = [];
         if (view === "day") {
             dates.push(formatDate(today));
         } else if (view === "week") {
             let start = new Date(today);
-            start.setDate(start.getDate() - start.getDay() + 1); // Montag
+            start.setDate(start.getDate() - (start.getDay() + 6) % 7); // Montag
             for (let i = 0; i < 7; i++) {
                 let d = new Date(start);
                 d.setDate(start.getDate() + i);
@@ -55,20 +61,18 @@ document.addEventListener("DOMContentLoaded", function() {
         let table = document.createElement("table");
         table.className = "table-auto min-w-full bg-white rounded shadow";
 
-        // Table head
         let thead = document.createElement("thead");
         thead.innerHTML = `
             <tr class="bg-gray-100">
-                <th class="px-4 py-2 text-left">Datum</th>
-                <th class="px-4 py-2 text-left">Zeit</th>
-                <th class="px-4 py-2 text-left">Fahrlehrer</th>
-                <th class="px-4 py-2 text-left">Simulator</th>
-                <th class="px-4 py-2 text-left">Status</th>
-                <th class="px-4 py-2 text-left">Aktion</th>
+                <th class="px-4 py-2">Datum</th>
+                <th class="px-4 py-2">Zeit</th>
+                <th class="px-4 py-2">Fahrlehrer</th>
+                <th class="px-4 py-2">Simulator</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Aktion</th>
             </tr>`;
         table.appendChild(thead);
 
-        // Table body
         let tbody = document.createElement("tbody");
         table.appendChild(tbody);
         container.appendChild(table);
@@ -80,14 +84,14 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (slots.length === 0) {
                         let row = document.createElement("tr");
                         row.innerHTML = `
-                            <td class="px-4 py-2">${date}</td>
+                            <td class="px-4 py-2">${formatGermanDate(date)}</td>
                             <td class="px-4 py-2 text-gray-400" colspan="5">Keine Slots</td>`;
                         tbody.appendChild(row);
                     } else {
                         slots.forEach(slot => {
                             let row = document.createElement("tr");
                             row.innerHTML = `
-                                <td class="px-4 py-2">${slot.date}</td>
+                                <td class="px-4 py-2">${formatGermanDate(slot.date)}</td>
                                 <td class="px-4 py-2">${slot.time}</td>
                                 <td class="px-4 py-2">${slot.fahrlehrer || '-'}</td>
                                 <td class="px-4 py-2">${slot.simulator ? '🖥️' : '-'}</td>
@@ -126,6 +130,33 @@ document.addEventListener("DOMContentLoaded", function() {
             currentView = this.getAttribute("data-view");
             renderCalendar(currentView);
         });
+    });
+
+    document.getElementById("prev").addEventListener("click", function() {
+        if (currentView === "day") {
+            today.setDate(today.getDate() - 1);
+        } else if (currentView === "week") {
+            today.setDate(today.getDate() - 7);
+        } else {
+            today.setMonth(today.getMonth() - 1);
+        }
+        renderCalendar(currentView);
+    });
+
+    document.getElementById("next").addEventListener("click", function() {
+        if (currentView === "day") {
+            today.setDate(today.getDate() + 1);
+        } else if (currentView === "week") {
+            today.setDate(today.getDate() + 7);
+        } else {
+            today.setMonth(today.getMonth() + 1);
+        }
+        renderCalendar(currentView);
+    });
+
+    document.getElementById("today").addEventListener("click", function() {
+        today = new Date();
+        renderCalendar(currentView);
     });
 
     renderCalendar(currentView);
