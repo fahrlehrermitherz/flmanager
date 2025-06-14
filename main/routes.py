@@ -1,63 +1,46 @@
-from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
-from models import Schueler, Slot, db
-from datetime import date, datetime
+from flask import Blueprint, render_template, jsonify, request
+from flask_login import login_required
+from models import db, Slot
+from datetime import datetime
 
 main_bp = Blueprint("main", __name__, template_folder="../templates/main")
 
 @main_bp.route("/dashboard")
+@login_required
 def dashboard():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
+    # Beispiel-Zähler oder Inhalte, wie schon vorhanden
+    return render_template("main/dashboard.html")
 
-    anzahl_schueler = Schueler.query.count()
-    heute = date.today().strftime("%d.%m.%Y")
-
-    return render_template("main/dashboard.html", anzahl_schueler=anzahl_schueler, heute=heute)
-
-# Kalenderansicht
 @main_bp.route("/calendar")
+@login_required
 def calendar():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
     return render_template("main/calendar.html")
 
-# Slots als JSON (optional nach Datum filterbar)
 @main_bp.route("/calendar/slots")
-def calendar_slots():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
-    
-    date_filter = request.args.get('date')
-    query = Slot.query
-    if date_filter:
-        try:
-            filter_date = datetime.strptime(date_filter, "%Y-%m-%d").date()
-            query = query.filter(Slot.date == filter_date)
-        except ValueError:
-            pass  # Falsches Format ignorieren
-    
-    slots = query.all()
-    return jsonify([
-        {
-            "id": slot.id,
-            "date": slot.date.strftime("%Y-%m-%d"),
-            "time": slot.time.strftime("%H:%M"),
-            "status": slot.status
-        } for slot in slots
-    ])
+@login_required
+def get_slots():
+    slots = Slot.query.order_by(Slot.datum, Slot.uhrzeit).all()
+    result = []
+    for s in slots:
+        result.append({
+            "id": s.id,
+            "date": s.datum.strftime('%d.%m.%Y'),
+            "time": s.uhrzeit.strftime('%H:%M'),
+            "status": s.status
+        })
+    return jsonify(result)
 
-# Slot buchen
 @main_bp.route("/calendar/book", methods=["POST"])
+@login_required
 def book_slot():
-    if "user_id" not in session:
-        return jsonify({"message": "Nicht eingeloggt"}), 401
-
-    slot_id = request.json.get("slot_id")
-    slot = Slot.query.get_or_404(slot_id)
-
+    data = request.get_json()
+    slot_id = data.get("slot_id")
+    slot = Slot.query.get(slot_id)
+    if not slot:
+        return jsonify({"message": "Slot nicht gefunden."}), 404
     if slot.status != "frei":
-        return jsonify({"message": "Slot bereits gebucht"}), 400
-
-    slot.status = "gebucht"
+        return jsonify({"message": "Slot nicht buchbar."}), 400
+    
+    slot.status = "reserviert"
     db.session.commit()
-    return jsonify({"message": "Slot erfolgreich gebucht"})
+    return jsonify({"message": "Slot erfolgreich gebucht!"})
