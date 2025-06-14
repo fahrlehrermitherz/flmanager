@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Neuen Slot erstellen{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Neuen Slot erstellen</h1>
+
+<form method="POST" class="space-y-4 max-w-md bg-white p-4 rounded shadow">
+    <div>
+        <label for="datum" class="block font-medium">Datum</label>
+        <input type="date" id="datum" name="datum" class="w-full border rounded px-2 py-1" required>
+    </div>
+    <div>
+        <label for="uhrzeit" class="block font-medium">Uhrzeit</label>
+        <input type="time" id="uhrzeit" name="uhrzeit" class="w-full border rounded px-2 py-1" required>
+    </div>
+    <div>
+        <label for="fahrlehrer_id" class="block font-medium">Fahrlehrer</label>
+        <select id="fahrlehrer_id" name="fahrlehrer_id" class="w-full border rounded px-2 py-1" required>
+            <option value="">Bitte wählen</option>
+            {% for fl in fahrlehrer %}
+            <option value="{{ fl.id }}">{{ fl.vorname }} {{ fl.nachname }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label class="inline-flex items-center">
+            <input type="checkbox" name="simulator" value="1" class="mr-2">
+            Simulator (Simon)
+        </label>
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Speichern</button>
+</form>
+{% endblock %}
