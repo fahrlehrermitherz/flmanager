@@ -96,13 +96,27 @@ class KassenbuchEintrag(db.Model):
 class Slot(db.Model):
     __tablename__ = 'slots'
     id = db.Column(db.Integer, primary_key=True)
-    datum = db.Column(db.Date, nullable=False)
-    uhrzeit = db.Column(db.Time, nullable=False)
-    fahrlehrer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    schueler_id = db.Column(db.Integer, db.ForeignKey('schueler.id'), nullable=True)
-    simulator = db.Column(db.Boolean, default=False)
-    vergeben = db.Column(db.Boolean, default=False)
-    bestätigt = db.Column(db.Boolean, default=False)
+    
+    datum = db.Column(db.Date, nullable=False)  # Datum des Slots (z. B. 2025-06-15)
+    uhrzeit = db.Column(db.Time, nullable=False)  # Uhrzeit des Slots (z. B. 14:00)
 
-    fahrlehrer = db.relationship('User', backref='slots')
-    schueler = db.relationship('Schueler', backref='slots')
+    fahrlehrer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Verantwortlicher Fahrlehrer
+    schueler_id = db.Column(db.Integer, db.ForeignKey('schueler.id'), nullable=True)  # Fahrschüler (optional, wenn gebucht)
+    
+    simulator = db.Column(db.Boolean, default=False)  # True = Simulator-Slot
+    vergeben = db.Column(db.Boolean, default=False)  # True = Slot gebucht/reserviert
+    bestaetigt = db.Column(db.Boolean, default=False)  # True = Slot abgeschlossen/bestätigt
+
+    fahrlehrer = db.relationship('User', backref='slots')  # Relation zum Fahrlehrer
+    schueler = db.relationship('Schueler', backref='slots')  # Relation zum Schüler
+
+    def __repr__(self):
+        status = "frei"
+        if self.vergeben:
+            status = "gebucht"
+        if self.bestaetigt:
+            status = "bestätigt"
+        if self.simulator:
+            status += " (Simulator)"
+        return f"<Slot {self.datum} {self.uhrzeit} - {status}>"
+
