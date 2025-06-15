@@ -13,33 +13,33 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Initialisiere Extensions
     db.init_app(app)
     login_manager.init_app(app)
 
-    # Blueprints importieren
     from auth.routes import auth as auth_blueprint
     from main.routes import main as main_blueprint
     from buero.routes import buero as buero_blueprint
     from schueler.routes import schueler_bp
 
-    # Blueprints registrieren
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
     app.register_blueprint(buero_blueprint)
     app.register_blueprint(schueler_bp)
 
-    # Auto-Tabellenerstellung
+    # Auto-Tabellen-Setup + DB-Test
     with app.app_context():
         db.create_all()
         print("✅ Tabellen erstellt oder geprüft (Auto-Start).")
+        try:
+            db.session.execute('SELECT 1')
+            print("✅ DB-Verbindung erfolgreich!")
+        except Exception as e:
+            print(f"❌ DB-Verbindungsfehler: {e}")
 
-    # Sichtbare Root-Route
     @app.route('/')
     def index():
         return "✅ Der FLManager-Server läuft! Bitte /auth/login aufrufen."
 
-    # Health-Check-Route
     @app.route('/health')
     def health():
         try:
