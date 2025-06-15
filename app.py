@@ -19,7 +19,7 @@ def create_app():
 
     # Blueprints importieren und registrieren
     from auth.routes import auth as auth_blueprint
-    from main.routes import main as main_blueprint
+    from main.routes import calendar_bp as main_blueprint  # Hier der geänderte Import
     from schueler.routes import schueler_bp as schueler_blueprint
 
     app.register_blueprint(auth_blueprint)
