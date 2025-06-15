@@ -3,11 +3,11 @@ from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 from models import db, Schueler, Fahrstundenprotokoll, FahrstundenTyp, User
 
-# Blueprint korrekt benennen
-schueler = Blueprint('schueler', __name__, url_prefix='/schueler')
+# Blueprint klar und konsistent benannt
+schueler_bp = Blueprint('schueler', __name__, url_prefix='/schueler')
 
 # Fahrstunde anlegen
-@schueler.route('/fahrstunde/anlegen', methods=['GET', 'POST'])
+@schueler_bp.route('/fahrstunde/anlegen', methods=['GET', 'POST'])
 @login_required
 def fahrstunde_anlegen():
     if request.method == 'POST':
@@ -45,7 +45,7 @@ def fahrstunde_anlegen():
     return render_template('schueler/fahrstunde_anlegen.html', schueler=schueler_list, typen=typen)
 
 # Kalenderdaten (JSON)
-@schueler.route('/fahrstunden/daten')
+@schueler_bp.route('/fahrstunden/daten')
 @login_required
 def fahrstunden_daten():
     fahrstunden = Fahrstundenprotokoll.query.all()
@@ -58,7 +58,7 @@ def fahrstunden_daten():
     return jsonify(events)
 
 # Schüler-Profil
-@schueler.route('/profil/<int:id>')
+@schueler_bp.route('/profil/<int:id>')
 @login_required
 def schueler_profil(id):
     schueler_obj = Schueler.query.get_or_404(id)
@@ -67,7 +67,8 @@ def schueler_profil(id):
         .all()
 
     naechste_fahrt = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
-    .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
-    .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc())\
-    .first()
+        .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
+        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc())\
+        .first()
 
+    return render_template('schueler/profil.html', schueler=schueler_obj, fahrten=fahrten, naechste_fahrt=naechste_fahrt)
