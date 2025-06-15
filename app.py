@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import Config
@@ -21,18 +21,17 @@ def create_app():
     from auth.routes import auth as auth_blueprint
     from main.routes import main as main_blueprint
     from buero.routes import buero as buero_blueprint
-    from schueler.routes import schueler_bp as schueler_blueprint
+    from schueler.routes import schueler_bp
 
     # Blueprints registrieren
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
     app.register_blueprint(buero_blueprint)
-    app.register_blueprint(schueler_blueprint)
+    app.register_blueprint(schueler_bp)
 
-    # Optional: Root-Redirect definieren
+    # Root-Redirect zur Login-Seite
     @app.route('/')
     def index():
-        from flask import redirect, url_for
         return redirect(url_for('auth.login'))
 
     return app
