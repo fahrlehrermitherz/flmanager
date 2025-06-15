@@ -4,22 +4,22 @@ from app import db
 from models import Slot
 from datetime import datetime
 
-main = Blueprint('main', __name__)
+calendar_bp = Blueprint('main', __name__)
 
 # Dashboard-Ansicht
-@main.route('/dashboard')
+@calendar_bp.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('main/dashboard.html')
 
 # Kalender-Ansicht
-@main.route('/calendar')
+@calendar_bp.route('/calendar')
 @login_required
 def calendar():
     return render_template('main/calendar.html')
 
 # API: Slots abrufen (mit optionalem Datumsfilter)
-@main.route('/calendar/slots')
+@calendar_bp.route('/calendar/slots')
 @login_required
 def get_slots():
     date_filter = request.args.get('date')
@@ -45,7 +45,7 @@ def get_slots():
     return jsonify(result)
 
 # API: Slot buchen
-@main.route('/calendar/book', methods=['POST'])
+@calendar_bp.route('/calendar/book', methods=['POST'])
 @login_required
 def book_slot():
     data = request.get_json()
