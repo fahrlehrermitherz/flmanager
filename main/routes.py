@@ -1,10 +1,15 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from flask_login import login_required
 from app import db
 from models import Slot
 from datetime import datetime
 
 main = Blueprint('main', __name__)
+
+# Startseite -> leitet direkt zum Login (oder Dashboard, wenn du willst)
+@main.route('/')
+def index():
+    return redirect(url_for('auth.login'))
 
 # Dashboard-Ansicht
 @main.route('/dashboard')
