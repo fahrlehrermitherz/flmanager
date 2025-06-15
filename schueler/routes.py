@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, flash
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, flash, make_response
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 from models import db, Schueler, Fahrstundenprotokoll, FahrstundenTyp
+from io import BytesIO
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 # Blueprint konsistent benannt
 schueler_bp = Blueprint('schueler', __name__, url_prefix='/schueler')
@@ -63,3 +66,55 @@ def fahrstunden_daten():
 @login_required
 def schueler_profil(id):
     schueler_obj = Schueler.query.get_or_404(id)
+    fahrten = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
+        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc()).all()
+    naechste_fahrt = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
+        .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
+        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc()).first()
+
+    return render_template(
+        'schueler/profil.html',
+        schueler=schueler_obj,
+        fahrten=fahrten,
+        naechste_fahrt=naechste_fahrt
+    )
+
+# PDF-Export einer Fahrstunde
+@schueler_bp.route('/fahrstunde/pdf/<int:fahrstunde_id>')
+@login_required
+def fahrstunde_pdf(fahrstunde_id):
+    fahrt = Fahrstundenprotokoll.query.get_or_404(fahrstunde_id)
+    schueler = fahrt.schueler
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, height - 50, "Fahrstunden-Protokoll")
+
+    p.setFont("Helvetica", 12)
+    p.drawString(50, height - 100, f"Schüler: {schueler.vorname} {schueler.nachname}")
+    p.drawString(50, height - 120, f"Datum: {fahrt.datum.strftime('%d.%m.%Y')}")
+    p.drawString(50, height - 140, f"Uhrzeit: {fahrt.uhrzeit.strftime('%H:%M')}")
+    p.drawString(50, height - 160, f"Typ: {fahrt.typ.bezeichnung}")
+    p.drawString(50, height - 180, f"Dauer: {fahrt.dauer_minuten} Minuten")
+    p.drawString(50, height - 200, f"Bezahlt: {fahrt.bezahlt}")
+
+    p.drawString(50, height - 240, "Inhalt / Notizen:")
+    text_object = p.beginText(50, height - 260)
+    text_object.setFont("Helvetica", 11)
+    for line in fahrt.inhalt.splitlines():
+        text_object.textLine(line)
+    p.drawText(text_object)
+
+    p.showPage()
+    p.save()
+
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=Fahrstunde_{fahrt.id}.pdf'
+    return response
