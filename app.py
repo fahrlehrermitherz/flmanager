@@ -39,4 +39,4 @@ def create_app():
     def index():
         return "✅ Der FLManager-Server läuft! Bitte /auth/login aufrufen."
 
-    return app
+    return ap
