@@ -23,13 +23,19 @@
     <a href="{{ url_for('main.calendar') }}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">Zum Kalender</a>
   </div>
 
-  <!-- Verwaltung -->
+  <!-- Admin-Bereich -->
   <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
-    <h2 class="text-lg font-semibold mb-2">⚙️ Verwaltung</h2>
-    <ul class="list-disc list-inside text-gray-700">
-      <li>Neue Fahrschüler anlegen</li>
-      <li>Fahrstunden verwalten</li>
-      <li>Daten aktualisieren</li>
+    <h2 class="text-lg font-semibold mb-2">🛠️ Admin-Bereich</h2>
+    <ul class="list-none space-y-2">
+      <li>
+        <a href="{{ url_for('schueler_bp.fahrstunde_anlegen') }}" class="block bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700">Neue Fahrstunde anlegen</a>
+      </li>
+      <li>
+        <a href="{{ url_for('schueler_bp.schueler_profil', id=1) }}" class="block bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700">Beispiel-Profil aufrufen</a>
+      </li>
+      <li>
+        <a href="{{ url_for('auth.logout') }}" class="block bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700">Logout</a>
+      </li>
     </ul>
   </div>
 </div>
