@@ -1,8 +1,6 @@
-flask
-flask_sqlalchemy
-flask_login
+Flask
+Flask-SQLAlchemy
+Flask-Login
 gunicorn
 psycopg2-binary
-flask_wtf
-email_validator
-reportlab
+Werkzeug
