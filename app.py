@@ -15,16 +15,19 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
 
+    # Blueprints laden
     from auth.routes import auth as auth_blueprint
     from main.routes import main as main_blueprint
+    from buero.routes import buero as buero_blueprint
     from schueler.routes import schueler_bp as schueler_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
+    app.register_blueprint(buero_blueprint)
     app.register_blueprint(schueler_blueprint)
 
     @app.route("/")
     def index():
-        return "✅ App läuft ohne db.create_all() – Tabellen sind bereits vorhanden."
+        return "✅ App läuft – öffne /auth/login im Browser!"
 
     return app
