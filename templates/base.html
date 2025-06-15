@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}FLManager{% endblock %}</title>
 
-  <!-- TailwindCSS via CDN -->
+  <!-- TailwindCSS einbinden -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Optional: eigene Tailwind-Config (z.B. Farben anpassen) -->
+  <!-- Optional: eigene Farben erweitern -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            fahrschuleblau: '#2563eb', // z.B. eigenes Blau
+            fahrschuleblau: '#2563eb',
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 min-h-screen">
   {% block content %}{% endblock %}
 </body>
 </html>
