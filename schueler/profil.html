@@ -1,80 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Profil: {{ schueler.vorname }}{% endblock %}
+
+{% block title %}Schülerprofil{% endblock %}
 
 {% block content %}
-{% set farbe = 'rose-100' if schueler.geschlecht == 'weiblich' else 'blue-100' %}
-{% set textfarbe = 'rose-600' if schueler.geschlecht == 'weiblich' else 'blue-600' %}
-{% set avatar = '👩‍🎓' if schueler.geschlecht == 'weiblich' else '👨‍🎓' %}
+<h1 class="text-3xl font-bold mb-6">👤 Schülerprofil: {{ schueler.vorname }} {{ schueler.nachname }}</h1>
 
-<div class="max-w-4xl mx-auto mt-6 bg-{{ farbe }} rounded-xl shadow-xl p-6 border-l-4 border-{{ textfarbe }}">
-    <!-- Avatar & Name -->
-    <div class="flex items-center mb-6">
-        <div class="w-20 h-20 bg-{{ textfarbe }} text-white rounded-full flex items-center justify-center text-4xl shadow-md">
-            {{ avatar }}
-        </div>
-        <div class="ml-4">
-            <h2 class="text-3xl font-bold text-{{ textfarbe }}">{{ schueler.vorname }} {{ schueler.nachname }}</h2>
-            <p class="text-gray-600 italic">Profilübersicht</p>
-        </div>
-    </div>
-
-    <!-- Mobiles Avatar-Menü -->
-    <div class="mt-4 md:hidden">
-      <button onclick="toggleMenu()" class="w-full bg-{{ textfarbe }} text-white py-2 rounded-lg flex items-center justify-center shadow">
-        {{ avatar }} Menü anzeigen
-      </button>
-      <div id="avatarMenu" class="hidden mt-2 bg-white border border-{{ textfarbe }} rounded-lg shadow-md">
-        <a href="#fahrten" class="block px-4 py-2 hover:bg-gray-100">📋 Fahrstunden</a>
-        <a href="#kontakt" class="block px-4 py-2 hover:bg-gray-100">📞 Kontakt</a>
-        <a href="#infos" class="block px-4 py-2 hover:bg-gray-100">ℹ️ Infos</a>
-      </div>
-    </div>
-
-    <!-- Schülerinfos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 mt-6" id="infos">
-        <p><strong>Alter:</strong> {{ alter }} Jahre</p>
-        <p><strong>Geschlecht:</strong> {{ schueler.geschlecht }}</p>
-        <p id="kontakt"><strong>Telefon:</strong> +49 {{ schueler.telefon }}</p>
-        <p><strong>Email:</strong> {{ schueler.email }}</p>
-        <p><strong>Adresse:</strong> {{ schueler.strasse }}, {{ schueler.plz }} {{ schueler.ort }}</p>
-        <p><strong>Fahrerlaubnis:</strong> {{ schueler.fahrerlaubnisklasse }}</p>
-        <p><strong>Sehhilfe:</strong> {{ '👓 Ja' if schueler.sehhilfe else 'Nein' }}</p>
-        <p><strong>Anmeldecode:</strong> {{ schueler.anmeldecode }}</p>
-        <p><strong>Sehtest:</strong> {{ '✅' if schueler.sehtest else '❌' }}</p>
-        <p><strong>Erste-Hilfe-Kurs:</strong> {{ '✅' if schueler.erste_hilfe_kurs else '❌' }}</p>
-    </div>
-
-    <!-- Fahrstunden -->
-    {% if fahrten %}
-    <div class="mt-8" id="fahrten">
-        <h3 class="text-xl font-semibold text-{{ textfarbe }}">📋 Fahrstundenverlauf</h3>
-        <ul class="mt-2 divide-y divide-gray-300">
-            {% for f in fahrten %}
-            <li class="py-2">
-                {{ f.datum.strftime('%d.%m.%Y') }} – {{ f.uhrzeit.strftime('%H:%M') }} Uhr –
-                {{ f.typ.bezeichnung }} ({{ f.dauer_minuten }} Min) – Bezahlt: {{ f.bezahlt }}
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% else %}
-    <p class="mt-6 text-gray-500">Noch keine Fahrstunden eingetragen.</p>
-    {% endif %}
-
-    <!-- Nächste Fahrstunde -->
-    {% if naechste_fahrt %}
-    <div class="mt-4 p-4 bg-green-100 border-l-4 border-green-600">
-        <strong>Nächste Fahrstunde:</strong>
-        {{ naechste_fahrt.datum.strftime('%d.%m.%Y') }} um {{ naechste_fahrt.uhrzeit.strftime('%H:%M') }} –
-        {{ naechste_fahrt.typ.bezeichnung }}
-    </div>
-    {% endif %}
+<div class="bg-white p-6 rounded-lg shadow mb-6">
+  <h2 class="text-lg font-semibold mb-4">📄 Stammdaten</h2>
+  <ul class="list-disc list-inside text-gray-700">
+    <li><strong>Geburtsdatum:</strong> {{ schueler.geburtsdatum.strftime('%d.%m.%Y') }}</li>
+    <li><strong>Adresse:</strong> {{ schueler.adresse }}, {{ schueler.plz }} {{ schueler.ort }}</li>
+    <li><strong>Telefon:</strong> {{ schueler.telefon }}</li>
+    <li><strong>Sehhilfe:</strong> {{ 'Ja' if schueler.sehhilfe else 'Nein' }}</li>
+    <li><strong>Theorie bestanden:</strong> {{ 'Ja' if schueler.theorie_bestanden else 'Nein' }}</li>
+  </ul>
 </div>
 
-<script>
-  function toggleMenu() {
-    const menu = document.getElementById("avatarMenu");
-    menu.classList.toggle("hidden");
-  }
-</script>
+<div class="bg-white p-6 rounded-lg shadow mb-6">
+  <h2 class="text-lg font-semibold mb-4">📋 Fahrstunden-Protokoll</h2>
+  {% if fahrten %}
+    <ul class="list-inside text-gray-700">
+      {% for fahrt in fahrten %}
+        <li>
+          {{ fahrt.datum.strftime('%d.%m.%Y') }} {{ fahrt.uhrzeit.strftime('%H:%M') }} -
+          {{ fahrt.typ.bezeichnung }} ({{ fahrt.dauer_minuten }} min)
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-500">Keine Fahrten protokolliert.</p>
+  {% endif %}
+</div>
+
+<div class="bg-white p-6 rounded-lg shadow">
+  <h2 class="text-lg font-semibold mb-4">🛠️ Aktionen</h2>
+  <ul class="list-none space-y-2">
+    <li>
+      <a href="{{ url_for('schueler_bp.fahrstunde_anlegen') }}" class="block bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700">Neue Fahrstunde anlegen</a>
+    </li>
+    <li>
+      <a href="{{ url_for('main.dashboard') }}" class="block bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">Zurück zum Dashboard</a>
+    </li>
+    <li>
+      <a href="{{ url_for('auth.logout') }}" class="block bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700">Logout</a>
+    </li>
+  </ul>
+</div>
 {% endblock %}
