@@ -17,16 +17,17 @@ def create_app():
 
     from auth.routes import auth as auth_blueprint
     from main.routes import main as main_blueprint
-    from buero.routes import buero as buero_blueprint
-    from schueler.routes import schueler as schueler_blueprint
+    from schueler.routes import schueler_bp as schueler_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
-    app.register_blueprint(buero_blueprint)
     app.register_blueprint(schueler_blueprint)
 
     with app.app_context():
         db.create_all()
-        print("✅ Tabellen erstellt oder geprüft.")
+
+    @app.route("/")
+    def index():
+        return "✅ App läuft – bitte /auth/login im Browser öffnen."
 
     return app
