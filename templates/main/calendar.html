@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Kalender{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">📅 Kalender</h1>
+
+<div class="bg-white p-6 rounded shadow">
+  <p class="mb-4">Hier kannst du deine Termine sehen. Die Slots werden dynamisch geladen.</p>
+
+  <!-- Platzhalter für Slots -->
+  <div id="slots" class="space-y-2">
+    <p class="text-gray-500">Slots werden geladen...</p>
+  </div>
+</div>
+
+<script>
+  // Einfaches Script zum Slots holen (nur Demo, du kannst es erweitern!)
+  fetch("{{ url_for('main.get_slots') }}")
+    .then(response => response.json())
+    .then(data => {
+      const slotsDiv = document.getElementById("slots");
+      slotsDiv.innerHTML = "";  // Alte Platzhalter löschen
+
+      if (data.length === 0) {
+        slotsDiv.innerHTML = "<p class='text-gray-500'>Keine Slots gefunden.</p>";
+      } else {
+        data.forEach(slot => {
+          const slotElem = document.createElement("div");
+          slotElem.className = "border p-3 rounded flex justify-between items-center";
+          slotElem.innerHTML = `
+            <span>${slot.date} ${slot.time} - ${slot.status}</span>
+            <span>${slot.simulator ? "🖥️ Simulator" : ""}</span>
+          `;
+          slotsDiv.appendChild(slotElem);
+        });
+      }
+    })
+    .catch(err => {
+      document.getElementById("slots").innerHTML = "<p class='text-red-500'>Fehler beim Laden der Slots.</p>";
+      console.error(err);
+    });
+</script>
+{% endblock %}
