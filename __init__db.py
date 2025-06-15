@@ -1,8 +1,11 @@
-from flmanager import create_app, db  # yourappname ersetzen!
-# Beispiel: from app import create_app, db wenn dein Ordner "app" heißt
+from app import create_app
+from models import db
 
-app = create_app()
+def init_db():
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+        print("✅ Datenbank-Tabellen erfolgreich erstellt!")
 
-with app.app_context():
-    db.create_all()
-    print("✅ Tabellen wurden erstellt.")
+if __name__ == "__main__":
+    init_db()
