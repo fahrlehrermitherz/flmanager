@@ -34,7 +34,7 @@ def create_app():
         db.create_all()
         print("✅ Tabellen erstellt oder geprüft (Auto-Start).")
 
-    # Root-Route für Sichtbarkeit
+    # Sichtbare Root-Route
     @app.route('/')
     def index():
         return "✅ Der FLManager-Server läuft! Bitte /auth/login aufrufen."
