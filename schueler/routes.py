@@ -67,5 +67,7 @@ def schueler_profil(id):
         .all()
 
     naechste_fahrt = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
-        .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
-        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenpro
+    .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
+    .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc())\
+    .first()
+
