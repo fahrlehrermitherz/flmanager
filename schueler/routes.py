@@ -6,7 +6,6 @@ from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-# Blueprint konsistent benannt
 schueler_bp = Blueprint('schueler', __name__, url_prefix='/schueler')
 
 # Fahrstunde anlegen
@@ -58,7 +57,6 @@ def fahrstunden_daten():
         'start': datetime.combine(f.datum, f.uhrzeit).isoformat(),
         'end': (datetime.combine(f.datum, f.uhrzeit) + timedelta(minutes=f.dauer_minuten)).isoformat()
     } for f in fahrstunden]
-
     return jsonify(events)
 
 # Schüler-Profil
@@ -72,14 +70,9 @@ def schueler_profil(id):
         .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
         .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc()).first()
 
-    return render_template(
-        'schueler/profil.html',
-        schueler=schueler_obj,
-        fahrten=fahrten,
-        naechste_fahrt=naechste_fahrt
-    )
+    return render_template('schueler/profil.html', schueler=schueler_obj, fahrten=fahrten, naechste_fahrt=naechste_fahrt)
 
-# PDF-Export einer Fahrstunde
+# PDF einer Fahrstunde
 @schueler_bp.route('/fahrstunde/pdf/<int:fahrstunde_id>')
 @login_required
 def fahrstunde_pdf(fahrstunde_id):
@@ -102,11 +95,11 @@ def fahrstunde_pdf(fahrstunde_id):
     p.drawString(50, height - 200, f"Bezahlt: {fahrt.bezahlt}")
 
     p.drawString(50, height - 240, "Inhalt / Notizen:")
-    text_object = p.beginText(50, height - 260)
-    text_object.setFont("Helvetica", 11)
+    text = p.beginText(50, height - 260)
+    text.setFont("Helvetica", 11)
     for line in fahrt.inhalt.splitlines():
-        text_object.textLine(line)
-    p.drawText(text_object)
+        text.textLine(line)
+    p.drawText(text)
 
     p.showPage()
     p.save()
@@ -117,4 +110,60 @@ def fahrstunde_pdf(fahrstunde_id):
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=Fahrstunde_{fahrt.id}.pdf'
+    return response
+
+# Sammel-PDF aller Fahrten
+@schueler_bp.route('/profil/<int:schueler_id>/pdf')
+@login_required
+def schueler_fahrten_pdf(schueler_id):
+    schueler = Schueler.query.get_or_404(schueler_id)
+    fahrten = Fahrstundenprotokoll.query.filter_by(schueler_id=schueler_id)\
+        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc()).all()
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, height - 50, f"Fahrtenübersicht: {schueler.vorname} {schueler.nachname}")
+
+    p.setFont("Helvetica", 12)
+    y = height - 90
+    p.drawString(50, y, f"Adresse: {schueler.adresse}, {schueler.plz} {schueler.ort}")
+    y -= 20
+    p.drawString(50, y, f"Telefon: {schueler.telefon}")
+    y -= 30
+
+    if not fahrten:
+        p.drawString(50, y, "Keine Fahrten protokolliert.")
+    else:
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(50, y, "Fahrten:")
+        y -= 20
+        p.setFont("Helvetica", 11)
+        for fahrt in fahrten:
+            line = f"{fahrt.datum.strftime('%d.%m.%Y')} {fahrt.uhrzeit.strftime('%H:%M')} - " \
+                   f"{fahrt.typ.bezeichnung}, {fahrt.dauer_minuten} min, Bezahlt: {fahrt.bezahlt}"
+            p.drawString(50, y, line)
+            y -= 15
+
+            if fahrt.inhalt:
+                for note_line in fahrt.inhalt.splitlines():
+                    p.drawString(60, y, f"→ {note_line}")
+                    y -= 12
+            y -= 5
+
+            if y < 50:
+                p.showPage()
+                y = height - 50
+
+    p.showPage()
+    p.save()
+
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=Fahrten_{schueler.vorname}_{schueler.nachname}.pdf'
     return response
