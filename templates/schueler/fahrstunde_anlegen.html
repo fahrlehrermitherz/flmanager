@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Fahrstunde anlegen{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">➕ Neue Fahrstunde anlegen</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mb-4">
+      {% for category, message in messages %}
+        <div class="p-3 rounded {{ 'bg-green-100 text-green-700' if category == 'success' else 'bg-red-100 text-red-700' }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div>
+    <label for="schueler_id" class="block text-sm font-medium text-gray-700 mb-1">Fahrschüler</label>
+    <select name="schueler_id" id="schueler_id" required class="w-full border rounded px-3 py-2">
+      <option value="" disabled selected>Bitte wählen</option>
+      {% for s in schueler %}
+        <option value="{{ s.id }}">{{ s.vorname }} {{ s.nachname }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label for="typ_id" class="block text-sm font-medium text-gray-700 mb-1">Fahrstundentyp</label>
+    <select name="typ_id" id="typ_id" required class="w-full border rounded px-3 py-2">
+      <option value="" disabled selected>Bitte wählen</option>
+      {% for t in typen %}
+        <option value="{{ t.id }}">{{ t.bezeichnung }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label for="datum" class="block text-sm font-medium text-gray-700 mb-1">Datum</label>
+    <input type="date" name="datum" id="datum" required class="w-full border rounded px-3 py-2">
+  </div>
+
+  <div>
+    <label for="uhrzeit" class="block text-sm font-medium text-gray-700 mb-1">Uhrzeit</label>
+    <input type="time" name="uhrzeit" id="uhrzeit" required class="w-full border rounded px-3 py-2">
+  </div>
+
+  <div>
+    <label for="dauer_minuten" class="block text-sm font-medium text-gray-700 mb-1">Dauer (Minuten)</label>
+    <input type="number" name="dauer_minuten" id="dauer_minuten" required min="1" class="w-full border rounded px-3 py-2">
+  </div>
+
+  <div>
+    <label for="bezahlt" class="block text-sm font-medium text-gray-700 mb-1">Bezahlt</label>
+    <select name="bezahlt" id="bezahlt" required class="w-full border rounded px-3 py-2">
+      <option value="" disabled selected>Bitte wählen</option>
+      <option value="Bar">Bar</option>
+      <option value="EC">EC</option>
+      <option value="Guthaben">Guthaben</option>
+    </select>
+  </div>
+
+  <div class="md:col-span-2">
+    <label for="inhalt" class="block text-sm font-medium text-gray-700 mb-1">Inhalt / Notizen</label>
+    <textarea name="inhalt" id="inhalt" rows="3" class="w-full border rounded px-3 py-2"></textarea>
+  </div>
+
+  <div class="md:col-span-2">
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Fahrstunde speichern</button>
+    <a href="{{ url_for('main.dashboard') }}" class="ml-2 text-blue-600 hover:underline">Zurück zum Dashboard</a>
+  </div>
+</form>
+{% endblock %}
