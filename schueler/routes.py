@@ -112,7 +112,7 @@ def fahrstunde_pdf(fahrstunde_id):
     response.headers['Content-Disposition'] = f'inline; filename=Fahrstunde_{fahrt.id}.pdf'
     return response
 
-# Sammel-PDF aller Fahrten
+# Sammel-PDF mit Tabellenlook
 @schueler_bp.route('/profil/<int:schueler_id>/pdf')
 @login_required
 def schueler_fahrten_pdf(schueler_id):
@@ -137,25 +137,42 @@ def schueler_fahrten_pdf(schueler_id):
     if not fahrten:
         p.drawString(50, y, "Keine Fahrten protokolliert.")
     else:
-        p.setFont("Helvetica-Bold", 12)
-        p.drawString(50, y, "Fahrten:")
-        y -= 20
-        p.setFont("Helvetica", 11)
+        # Tabellenkopf
+        p.setFont("Helvetica-Bold", 10)
+        p.drawString(50, y, "Datum")
+        p.drawString(100, y, "Zeit")
+        p.drawString(140, y, "Typ")
+        p.drawString(260, y, "Dauer")
+        p.drawString(310, y, "Bezahlt")
+        p.drawString(380, y, "Inhalt")
+        y -= 5
+        p.line(50, y, width - 50, y)
+        y -= 15
+        p.setFont("Helvetica", 9)
+
         for fahrt in fahrten:
-            line = f"{fahrt.datum.strftime('%d.%m.%Y')} {fahrt.uhrzeit.strftime('%H:%M')} - " \
-                   f"{fahrt.typ.bezeichnung}, {fahrt.dauer_minuten} min, Bezahlt: {fahrt.bezahlt}"
-            p.drawString(50, y, line)
-            y -= 15
-
-            if fahrt.inhalt:
-                for note_line in fahrt.inhalt.splitlines():
-                    p.drawString(60, y, f"→ {note_line}")
-                    y -= 12
-            y -= 5
-
             if y < 50:
                 p.showPage()
                 y = height - 50
+
+            p.drawString(50, y, fahrt.datum.strftime('%d.%m.%Y'))
+            p.drawString(100, y, fahrt.uhrzeit.strftime('%H:%M'))
+            p.drawString(140, y, fahrt.typ.bezeichnung[:15])
+            p.drawString(260, y, f"{fahrt.dauer_minuten} min")
+            p.drawString(310, y, fahrt.bezahlt)
+
+            # Inhalt
+            inhalt_y = y
+            for line in fahrt.inhalt.splitlines():
+                p.drawString(380, inhalt_y, line)
+                inhalt_y -= 10
+                if inhalt_y < 50:
+                    p.showPage()
+                    inhalt_y = height - 50
+
+            y = inhalt_y - 5
+            p.line(50, y, width - 50, y)
+            y -= 5
 
     p.showPage()
     p.save()
