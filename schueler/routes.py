@@ -50,11 +50,11 @@ def fahrstunde_anlegen():
 @login_required
 def fahrstunden_daten():
     fahrstunden = Fahrstundenprotokoll.query.all()
-    events = [{
+    events = [ {
         'title': f"{f.schueler.vorname} {f.schueler.nachname} - {f.typ.bezeichnung}",
         'start': datetime.combine(f.datum, f.uhrzeit).isoformat(),
         'end': (datetime.combine(f.datum, f.uhrzeit) + timedelta(minutes=f.dauer_minuten)).isoformat()
-    } for f in fahrstunden]
+    } for f in fahrstunden ]
     return jsonify(events)
 
 @schueler_bp.route('/profil/<int:id>')
@@ -62,15 +62,10 @@ def fahrstunden_daten():
 def schueler_profil(id):
     schueler_obj = Schueler.query.get_or_404(id)
     fahrten = Fahrstundenprotokoll.query.filter_by(schueler_id=id).order_by(
-        Fahrstundenprotokoll.datum.asc(),
-        Fahrstundenprotokoll.uhrzeit.asc()
-    ).all()
+        Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc()).all()
 
     naechste_fahrt = Fahrstundenprotokoll.query.filter_by(schueler_id=id).filter(
-        Fahrstundenprotokoll.datum >= datetime.utcnow().date()
-    ).order_by(
-        Fahrstundenprotokoll.datum.asc(),
-        Fahrstundenprotokoll.uhrzeit.asc()
-    ).first()
+        Fahrstundenprotokoll.datum >= datetime.utcnow().date()).order_by(
+        Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc()).first()
 
     return render_template('schueler/profil.html', schueler=schueler_obj, fahrten=fahrten, naechste_fahrt=naechste_fahrt)
