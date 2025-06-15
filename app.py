@@ -34,9 +34,9 @@ def create_app():
         db.create_all()
         print("✅ Tabellen erstellt oder geprüft (Auto-Start).")
 
-    # Root-Redirect zur Login-Seite
+    # Root-Route für Sichtbarkeit
     @app.route('/')
     def index():
-        return redirect(url_for('auth.login'))
+        return "✅ Der FLManager-Server läuft! Bitte /auth/login aufrufen."
 
     return app
