@@ -1,20 +1,23 @@
 import os
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-secret"
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
     
-    # Nimmt Public DB, falls vorhanden, ansonsten DATABASE_URL
+    # Datenbank-URL: Public URL > DATABASE_URL > Fallback SQLite
     SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("PUBLIC_DATABASE_URL") or 
-        os.environ.get("DATABASE_URL") or 
+        os.environ.get("postgresql://postgres:bydexzqxToeTpGxCynAynqxRRqBThlXd@nozomi.proxy.rlwy.net:37182/railway") or 
+        os.environ.get("postgresql://postgres:bydexzqxToeTpGxCynAynqxRRqBThlXd@postgres.railway.internal:5432/railway") or 
         "sqlite:///local.db"
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # SSL für Railway-Postgres
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "connect_args": {
-            "sslmode": "require"
+    # Railway: SSL erzwingen, nur wenn Postgres verwendet wird
+    if SQLALCHEMY_DATABASE_URI.startswith("postgresql"):
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            "connect_args": {
+                "sslmode": "require"
+            }
         }
-    }
+    else:
+        SQLALCHEMY_ENGINE_OPTIONS = {}
