@@ -34,17 +34,18 @@ def create_app():
         db.create_all()
         print("✅ Tabellen erstellt oder geprüft (Auto-Start).")
 
-@app.route('/health')
-def health():
-    try:
-        db.session.execute('SELECT 1')
-        return "✅ DB verbunden"
-    except Exception as e:
-        return f"❌ DB-Fehler: {e}"
-    
     # Root-Route für Sichtbarkeit
     @app.route('/')
     def index():
         return "✅ Der FLManager-Server läuft! Bitte /auth/login aufrufen."
+
+    # Health-Check-Route
+    @app.route('/health')
+    def health():
+        try:
+            db.session.execute('SELECT 1')
+            return "✅ DB verbunden"
+        except Exception as e:
+            return f"❌ DB-Fehler: {e}"
 
     return app
