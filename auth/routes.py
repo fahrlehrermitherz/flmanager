@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 from app import db, login_manager
 from models import User
@@ -12,6 +12,10 @@ def load_user(user_id):
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash('⚠️ Du bist bereits eingeloggt.', 'info')
+        return redirect(url_for('main.dashboard'))
+
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -23,9 +27,13 @@ def login():
             session["rolle"] = user.rolle.name
             session["name"] = f"{user.vorname} {user.nachname}"
             flash('✅ Login erfolgreich.', 'success')
-            return redirect(url_for('main.dashboard'))
+
+            # Weiterleiten zur ursprünglich angeforderten Seite oder Dashboard
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))
         else:
             flash('❌ Ungültige Zugangsdaten.', 'danger')
+
     return render_template('auth/login.html')
 
 @auth.route('/logout')
