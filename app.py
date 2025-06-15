@@ -29,6 +29,11 @@ def create_app():
     app.register_blueprint(buero_blueprint)
     app.register_blueprint(schueler_bp)
 
+    # Auto-Tabellenerstellung
+    with app.app_context():
+        db.create_all()
+        print("✅ Tabellen erstellt oder geprüft (Auto-Start).")
+
     # Root-Redirect zur Login-Seite
     @app.route('/')
     def index():
