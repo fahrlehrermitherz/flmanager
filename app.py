@@ -6,7 +6,7 @@ from config import Config
 # DB + Login-Manager initialisieren
 db = SQLAlchemy()
 login_manager = LoginManager()
-login_manager.login_view = 'auth.login'  # Umleitung, wenn nicht eingeloggt
+login_manager.login_view = 'auth.login'  # Umleitung bei nicht eingeloggt
 login_manager.login_message_category = 'info'
 
 def create_app():
@@ -29,6 +29,7 @@ def create_app():
     # Tabellen bei Bedarf erzeugen
     with app.app_context():
         db.create_all()
+        print("✅ Tabellen wurden erstellt oder sind bereits vorhanden.")
 
     @app.route("/")
     def index():
