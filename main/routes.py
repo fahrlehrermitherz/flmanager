@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app import db
-from models import Slot
+from models import Slot, Schueler
 from datetime import datetime
 
 main = Blueprint('main', __name__)
@@ -15,7 +15,9 @@ def index():
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('main/dashboard.html')
+    anzahl_schueler = Schueler.query.count()
+    heute = datetime.now().strftime("%d.%m.%Y")
+    return render_template('main/dashboard.html', anzahl_schueler=anzahl_schueler, heute=heute)
 
 # Kalender-Ansicht
 @main.route('/calendar')
