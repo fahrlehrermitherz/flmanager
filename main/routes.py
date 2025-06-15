@@ -4,7 +4,7 @@ from app import db
 from models import Slot
 from datetime import datetime
 
-calendar_bp = Blueprint('main', __name__)
+main = Blueprint('main', __name__)
 
 # Dashboard-Ansicht
 @calendar_bp.route('/dashboard')
