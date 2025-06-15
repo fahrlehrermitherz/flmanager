@@ -23,13 +23,13 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(schueler_blueprint)
 
-    # Tabellen bei App-Start erstellen (im App-Kontext!)
     with app.app_context():
         db.create_all()
-        print("✅ Tabellen wurden erstellt oder sind bereits vorhanden.")
+        print("✅ Tabellen erstellt oder vorhanden.")
+        print(f"⚡ DB URI: {Config.SQLALCHEMY_DATABASE_URI}")
 
     @app.route("/")
     def index():
-        return "✅ App läuft! Öffne /auth/login im Browser."
+        return "✅ App läuft!"
 
     return app
