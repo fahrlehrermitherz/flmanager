@@ -28,15 +28,6 @@ def create_app():
 
     @app.route("/")
     def index():
-        return "✅ App läuft – öffne /auth/login im Browser!"
-
-    # HIER die Test-Route
-    @app.route("/dbcheck")
-    def dbcheck():
-        try:
-            db.session.execute("SELECT 1")
-            return "✅ DB Verbindung steht!"
-        except Exception as e:
-            return f"❌ DB Fehler: {e}"
+        return "✅ App läuft!"
 
     return app
