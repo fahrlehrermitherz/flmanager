@@ -23,13 +23,10 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(schueler_blueprint)
 
-    # Tabellen bei App-Start erstellen
-    def create_tables():
-        with app.app_context():
-            db.create_all()
-            print("✅ Tabellen wurden erstellt oder sind bereits vorhanden.")
-
-    app.before_first_request(create_tables)
+    # Tabellen bei App-Start erstellen (im App-Kontext!)
+    with app.app_context():
+        db.create_all()
+        print("✅ Tabellen wurden erstellt oder sind bereits vorhanden.")
 
     @app.route("/")
     def index():
