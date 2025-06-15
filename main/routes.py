@@ -7,19 +7,19 @@ from datetime import datetime
 main = Blueprint('main', __name__)
 
 # Dashboard-Ansicht
-@calendar_bp.route('/dashboard')
+@main.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('main/dashboard.html')
 
 # Kalender-Ansicht
-@calendar_bp.route('/calendar')
+@main.route('/calendar')
 @login_required
 def calendar():
     return render_template('main/calendar.html')
 
 # API: Slots abrufen (mit optionalem Datumsfilter)
-@calendar_bp.route('/calendar/slots')
+@main.route('/calendar/slots')
 @login_required
 def get_slots():
     date_filter = request.args.get('date')
@@ -45,7 +45,7 @@ def get_slots():
     return jsonify(result)
 
 # API: Slot buchen
-@calendar_bp.route('/calendar/book', methods=['POST'])
+@main.route('/calendar/book', methods=['POST'])
 @login_required
 def book_slot():
     data = request.get_json()
