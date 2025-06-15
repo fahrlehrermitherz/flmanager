@@ -5,3 +5,4 @@ gunicorn
 psycopg2-binary
 flask_wtf
 email_validator
+reportlab
