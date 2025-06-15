@@ -1,15 +1,18 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, flash
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
-from models import db, Schueler, Fahrstundenprotokoll, FahrstundenTyp, User
+from models import db, Schueler, Fahrstundenprotokoll, FahrstundenTyp
 
-# Blueprint klar und konsistent benannt
+# Blueprint konsistent benannt
 schueler_bp = Blueprint('schueler', __name__, url_prefix='/schueler')
 
 # Fahrstunde anlegen
 @schueler_bp.route('/fahrstunde/anlegen', methods=['GET', 'POST'])
 @login_required
 def fahrstunde_anlegen():
+    schueler_list = Schueler.query.all()
+    typen = FahrstundenTyp.query.all()
+
     if request.method == 'POST':
         try:
             schueler_id = request.form['schueler_id']
@@ -34,13 +37,11 @@ def fahrstunde_anlegen():
             db.session.add(neue_fahrstunde)
             db.session.commit()
 
-            flash('Fahrstunde erfolgreich angelegt.', 'success')
-            return redirect(url_for('schueler.fahrstunde_anlegen'))
+            flash('✅ Fahrstunde erfolgreich angelegt.', 'success')
+            return redirect(url_for('schueler_bp.fahrstunde_anlegen'))
         except Exception as e:
-            flash(f'Fehler beim Anlegen: {e}', 'danger')
-
-    schueler_list = Schueler.query.all()
-    typen = FahrstundenTyp.query.all()
+            db.session.rollback()
+            flash(f'❌ Fehler beim Anlegen: {e}', 'danger')
 
     return render_template('schueler/fahrstunde_anlegen.html', schueler=schueler_list, typen=typen)
 
@@ -62,13 +63,3 @@ def fahrstunden_daten():
 @login_required
 def schueler_profil(id):
     schueler_obj = Schueler.query.get_or_404(id)
-    fahrten = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
-        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc())\
-        .all()
-
-    naechste_fahrt = Fahrstundenprotokoll.query.filter_by(schueler_id=id)\
-        .filter(Fahrstundenprotokoll.datum >= datetime.utcnow().date())\
-        .order_by(Fahrstundenprotokoll.datum.asc(), Fahrstundenprotokoll.uhrzeit.asc())\
-        .first()
-
-    return render_template('schueler/profil.html', schueler=schueler_obj, fahrten=fahrten, naechste_fahrt=naechste_fahrt)
